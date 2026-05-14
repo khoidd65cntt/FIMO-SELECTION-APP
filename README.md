@@ -12,7 +12,9 @@
 ---
 
 ## 📽️ Giới thiệu dự án (Introduction)
-**FIMO** (được kết hợp từ **Fi**lm và **Mo**ve) là ứng dụng di động được phát triển nhằm tối ưu hóa trải nghiệm giải trí cá nhân. Ứng dụng giải quyết triệt để vấn đề "ngộp" thông tin bằng cách cung cấp một bộ lọc thông minh, giúp người dùng tìm thấy bộ phim ưng ý chỉ trong vài lần chạm.
+**FIMO** (được kết hợp từ **Fi**lm và **Mo**ve) là ứng dụng di động được xây dựng nhằm giải quyết bài toán "Information Overload" (quá tải thông tin) trong lĩnh vực giải trí số. Thay vì để người dùng lãng phí thời gian tra cứu phân mảnh, FIMO tập trung vào việc tối ưu hóa quy trình khám phá điện ảnh thông qua một nền tảng tập trung, mượt mà và trực quan.
+
+Dự án không chỉ là một ứng dụng tra cứu, mà còn là sự thực thi các nguyên lý lập trình di động tiên tiến. Bằng cách tích hợp dữ liệu thời gian thực từ TMDB API và áp dụng các mô hình kiến trúc như MVVM( Model-View-ViewModel ) cùng những Design Patterns tiêu chuẩn (Singleton, Observer), FIMO mang đến một giải pháp công nghệ hoàn chỉnh: từ việc xử lý bất đồng bộ dữ liệu đến quản lý bộ nhớ cục bộ ổn định cho người dùng.
 
 ### ⚠️ Vấn đề cốt lõi:
 *   **Quá tải lựa chọn:** Giảm thời gian tìm kiếm phim từ hàng chục phút xuống còn vài giây.
