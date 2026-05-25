@@ -48,7 +48,6 @@ public class SearchFragment extends Fragment {
 
         if (edtSearchInput != null) {
 
-            // 1. Lắng nghe thao tác gõ (Tăng độ trễ lên 800ms để gõ tiếng Việt thoải mái)
             edtSearchInput.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -62,16 +61,13 @@ public class SearchFragment extends Fragment {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    // Chờ 800 mili-giây sau khi ngừng gõ mới bắt đầu tìm kiếm
                     searchRunnable = () -> filterMovies(s.toString().trim());
                     searchHandler.postDelayed(searchRunnable, 800);
                 }
             });
 
-            // 2. Lắng nghe sự kiện khi người dùng bấm nút Kính Lúp (Search) trên bàn phím ảo
             edtSearchInput.setOnEditorActionListener((v, actionId, event) -> {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    // Hủy bộ đếm chờ và tìm kiếm ngay lập tức
                     if (searchRunnable != null) {
                         searchHandler.removeCallbacks(searchRunnable);
                     }

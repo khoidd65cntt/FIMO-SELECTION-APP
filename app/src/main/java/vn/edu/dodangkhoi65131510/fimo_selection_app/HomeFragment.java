@@ -54,7 +54,6 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // ================= XỬ LÝ SLIDER PHIM (TOP 5) =================
         viewPagerSlider = view.findViewById(R.id.viewPagerSlider);
         sliderMovies = new ArrayList<>();
         loadSliderData();
@@ -74,12 +73,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // ĐÃ KHÔI PHỤC: Lắng nghe sự kiện click cho 3 nút bộ lọc Thể loại, Quốc gia, Năm
         view.findViewById(R.id.tvFilterGenre).setOnClickListener(v -> showDialog(R.layout.layout_dialog_genres, 0));
         view.findViewById(R.id.tvFilterCountry).setOnClickListener(v -> showDialog(R.layout.layout_dialog_country, 0));
         view.findViewById(R.id.tvFilterYear).setOnClickListener(v -> showDialog(R.layout.layout_dialog_year, 1));
 
-        // ================= XỬ LÝ DANH SÁCH PHIM CUỘN NGANG =================
         RecyclerView rvBanners = view.findViewById(R.id.rvBanners);
         RecyclerView rvTop10 = view.findViewById(R.id.rvTop10);
         RecyclerView rvForYou = view.findViewById(R.id.rvForYou);
@@ -117,7 +114,6 @@ public class HomeFragment extends Fragment {
         rv.setAdapter(adapter);
     }
 
-    // ĐÃ KHÔI PHỤC: Hàm hiển thị Dialog khi lựa chọn bộ lọc
     private void showDialog(int layoutId, int type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = LayoutInflater.from(requireContext()).inflate(layoutId, null);
@@ -152,7 +148,6 @@ public class HomeFragment extends Fragment {
 
     private void loadSliderData() {
         String pkg = requireContext().getPackageName();
-        // GIỮ NGUYÊN: Đủ 5 bộ phim kèm mô tả chi tiết như ban đầu của bạn
         sliderMovies.add(new Movie("s1", "Avatar: The Way of Water", "Jake Sully cùng gia đình mới của mình phải chiến đấu chống lại sự xâm lược của loài người để bảo vệ hành tinh Pandora xanh tươi.","android.resource://" + pkg + "/" + R.drawable.avatar2, 8.8));
         sliderMovies.add(new Movie("s2", "Interstellar: Hố Đen Tử Thần", "Hành trình xuyên không gian đầy cân não của nhóm phi hành gia đi tìm kiếm một ngôi nhà mới cho nhân loại khi Trái Đất sắp bị diệt vong.", "android.resource://" + pkg + "/" + R.drawable.interstellar, 8.9));
         sliderMovies.add(new Movie("s3", "Spider-man: No Way Home", "Khi danh tính bị lộ, Peter Parker nhờ đến phép thuật của Doctor Strange, vô tình mở ra đa vũ trụ và đối mặt với hàng loạt kẻ thù cũ.", "android.resource://" + pkg + "/" + R.drawable.spm_nohome, 8.7));
@@ -191,7 +186,6 @@ public class HomeFragment extends Fragment {
             holder.tvDesc.setText(movie.getMoTa());
             Glide.with(context).load(movie.getAnhBiaUrl()).centerCrop().into(holder.imgSlider);
 
-            // Xử lý nút bấm Xem Phim chuyển sang màn hình chi tiết
             holder.btnWatchSlider.setOnClickListener(v -> {
                 Intent intent = new Intent(context, MovieDetailActivity.class);
                 intent.putExtra("MOVIE_TITLE", movie.getTieuDe());

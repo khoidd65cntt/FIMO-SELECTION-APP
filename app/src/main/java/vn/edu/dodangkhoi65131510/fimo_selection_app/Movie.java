@@ -3,7 +3,7 @@ package vn.edu.dodangkhoi65131510.fimo_selection_app;
 public class Movie {
     private String id;
     private String tieuDe;
-    private String noiDungThu3; // Dùng chung cho cả link Trailer hoặc nội dung Mô tả
+    private String noiDungThu3;
     private String anhBiaUrl;
     private double diem;
 
@@ -23,7 +23,6 @@ public class Movie {
         return tieuDe;
     }
 
-    // --- CÁC HÀM GETTER ĐƯỢC THÊM ĐỂ CHỐNG LỖI ĐỎ CHO MỌI ADAPTER ---
     public String getMoTa() {
         return noiDungThu3;
     }

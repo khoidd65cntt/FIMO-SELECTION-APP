@@ -21,21 +21,18 @@ public class SearchActivity extends AppCompatActivity {
     private List<Movie> allMovies;
     private List<Movie> filteredList;
 
-    // Handler to handle typing delay for stable Vietnamese Telex input
     private Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Connects to the activity_search.xml layout
         setContentView(R.layout.activity_search);
 
         EditText edtSearchInput = findViewById(R.id.edtSearchInput);
         RecyclerView rvSearchResults = findViewById(R.id.rvSearchResults);
         ImageView btnBackSearch = findViewById(R.id.btnBackSearch);
 
-        // Back button closes the Activity and returns to the previous screen
         if (btnBackSearch != null) {
             btnBackSearch.setOnClickListener(v -> finish());
         }
@@ -54,7 +51,6 @@ public class SearchActivity extends AppCompatActivity {
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    // Cancel the previous pending search request while user is typing
                     if (searchRunnable != null) {
                         searchHandler.removeCallbacks(searchRunnable);
                     }
@@ -62,7 +58,6 @@ public class SearchActivity extends AppCompatActivity {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    // Schedule search execution 300ms after user stops typing to prevent keyboard focus glitch
                     searchRunnable = () -> filterMovies(s.toString().trim());
                     searchHandler.postDelayed(searchRunnable, 300);
                 }
@@ -76,7 +71,6 @@ public class SearchActivity extends AppCompatActivity {
             filteredList.addAll(allMovies);
         } else {
             for (Movie m : allMovies) {
-                // Case-insensitive text matching filter
                 if (m.getTieuDe().toLowerCase().contains(text.toLowerCase())) {
                     filteredList.add(m);
                 }
@@ -100,7 +94,6 @@ public class SearchActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Prevent memory leaks by removing callbacks when activity is destroyed
         if (searchRunnable != null) {
             searchHandler.removeCallbacks(searchRunnable);
         }
