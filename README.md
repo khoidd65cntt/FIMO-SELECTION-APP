@@ -51,7 +51,7 @@ Dự án được xây dựng dựa trên tiêu chuẩn mã nguồn sạch và c
     <tr>
       <!-- Bạn thay link via.placeholder bằng link ảnh thực tế sau khi hoàn thành app nhé -->
       <td><img src="https://github.com/user-attachments/assets/a322bf9d-272e-4b18-929f-27233827dcc0" width="200"></td>
-      <td><img src="https://via.placeholder.com/200x400/1a1a1a/e50914?text=Search+Feature" width="200"></td>
+      <td><img src="https://github.com/user-attachments/assets/dda50f82-be40-49f3-802e-b965e61832f2" width="200"></td>
       <td><img src="https://via.placeholder.com/200x400/1a1a1a/e50914?text=Movie+Details" width="200"></td>
     </tr>
     <tr align="center">
