@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,11 +33,23 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class HomeFragment extends Fragment {
 
     private ViewPager2 viewPagerSlider;
+    private SliderAdapter sliderAdapter;
+
     private List<Movie> sliderMovies;
     private List<Movie> movieList;
+    private List<Movie> animeList;
+
+    private MovieAdapter movieAdapter;
+    private MovieAdapter animeAdapter;
+
+    private static final String API_KEY = "3509f85d40f81d254b5afc2d8beaa8e1";
 
     private Handler sliderHandler = new Handler(Looper.getMainLooper());
     private Runnable sliderRunnable = new Runnable() {
@@ -56,9 +70,7 @@ public class HomeFragment extends Fragment {
 
         viewPagerSlider = view.findViewById(R.id.viewPagerSlider);
         sliderMovies = new ArrayList<>();
-        loadSliderData();
-
-        SliderAdapter sliderAdapter = new SliderAdapter(requireContext(), sliderMovies);
+        sliderAdapter = new SliderAdapter(requireContext(), sliderMovies);
         viewPagerSlider.setAdapter(sliderAdapter);
 
         TabLayout tabLayoutDots = view.findViewById(R.id.tabLayoutDots);
@@ -69,7 +81,9 @@ public class HomeFragment extends Fragment {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 sliderHandler.removeCallbacks(sliderRunnable);
-                sliderHandler.postDelayed(sliderRunnable, 5000);
+                if (sliderAdapter.getItemCount() > 0) {
+                    sliderHandler.postDelayed(sliderRunnable, 5000);
+                }
             }
         });
 
@@ -82,31 +96,20 @@ public class HomeFragment extends Fragment {
         RecyclerView rvForYou = view.findViewById(R.id.rvForYou);
 
         movieList = new ArrayList<>();
-        loadMoviesWithRealData();
+        animeList = new ArrayList<>();
 
-        setupRecyclerView(rvBanners, new MovieAdapter(requireContext(), movieList));
-        setupRecyclerView(rvTop10, new MovieAdapter(requireContext(), movieList));
-        setupRecyclerView(rvForYou, new MovieAdapter(requireContext(), movieList));
+        movieAdapter = new MovieAdapter(requireContext(), movieList);
+        animeAdapter = new MovieAdapter(requireContext(), animeList);
+
+        setupRecyclerView(rvBanners, movieAdapter);
+        setupRecyclerView(rvTop10, animeAdapter);
+        setupRecyclerView(rvForYou, movieAdapter);
+
+        fetchNowPlayingForSlider();
+        fetchPopularMoviesFromApi();
+        fetchPopularAnimeFromApi();
 
         return view;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        sliderHandler.removeCallbacks(sliderRunnable);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        sliderHandler.postDelayed(sliderRunnable, 3000);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        sliderHandler.removeCallbacks(sliderRunnable);
     }
 
     private void setupRecyclerView(RecyclerView rv, MovieAdapter adapter) {
@@ -114,10 +117,66 @@ public class HomeFragment extends Fragment {
         rv.setAdapter(adapter);
     }
 
+    private void fetchNowPlayingForSlider() {
+        TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
+        Call<MovieResponse> call = apiService.getNowPlayingMovies(API_KEY, "vi-VN", "VN", 1);
+        call.enqueue(new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    sliderMovies.clear();
+                    List<Movie> results = response.body().getResults();
+                    int limit = Math.min(results.size(), 5);
+                    for (int i = 0; i < limit; i++) sliderMovies.add(results.get(i));
+                    sliderAdapter.notifyDataSetChanged();
+                }
+            }
+            @Override
+            public void onFailure(Call<MovieResponse> call, Throwable t) {
+                Log.e("API_ERROR", "Lỗi tải Slider: " + t.getMessage());
+            }
+        });
+    }
+
+    private void fetchPopularMoviesFromApi() {
+        TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
+        Call<MovieResponse> call = apiService.getPopularMovies(API_KEY, "vi-VN", 1);
+        call.enqueue(new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    movieList.clear();
+                    movieList.addAll(response.body().getResults());
+                    movieAdapter.notifyDataSetChanged();
+                }
+            }
+            @Override
+            public void onFailure(Call<MovieResponse> call, Throwable t) {}
+        });
+    }
+
+    private void fetchPopularAnimeFromApi() {
+        TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
+        Call<MovieResponse> call = apiService.getPopularAnime(API_KEY, "vi-VN", "16", "ja", "popularity.desc", 1);
+        call.enqueue(new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    animeList.clear();
+                    List<Movie> results = response.body().getResults();
+                    int limit = Math.min(results.size(), 10);
+                    for (int i = 0; i < limit; i++) animeList.add(results.get(i));
+                    animeAdapter.notifyDataSetChanged();
+                }
+            }
+            @Override
+            public void onFailure(Call<MovieResponse> call, Throwable t) {}
+        });
+    }
+
     private void showDialog(int layoutId, int type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = LayoutInflater.from(requireContext()).inflate(layoutId, null);
-
         if (type == 1) {
             GridLayout grid = dialogView.findViewById(R.id.gridYears);
             if (grid != null) {
@@ -127,12 +186,10 @@ public class HomeFragment extends Fragment {
                     tv.setTextColor(Color.WHITE);
                     tv.setGravity(Gravity.CENTER);
                     tv.setPadding(20, 30, 20, 30);
-
                     GridLayout.LayoutParams params = new GridLayout.LayoutParams();
                     params.width = 0;
                     params.height = GridLayout.LayoutParams.WRAP_CONTENT;
                     params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-
                     tv.setLayoutParams(params);
                     grid.addView(tv);
                 }
@@ -140,28 +197,21 @@ public class HomeFragment extends Fragment {
         }
         builder.setView(dialogView);
         AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.show();
     }
 
-    private void loadSliderData() {
-        String pkg = requireContext().getPackageName();
-        sliderMovies.add(new Movie("s1", "Avatar: The Way of Water", "Jake Sully cùng gia đình mới của mình phải chiến đấu chống lại sự xâm lược của loài người để bảo vệ hành tinh Pandora xanh tươi.","android.resource://" + pkg + "/" + R.drawable.avatar2, 8.8));
-        sliderMovies.add(new Movie("s2", "Interstellar: Hố Đen Tử Thần", "Hành trình xuyên không gian đầy cân não của nhóm phi hành gia đi tìm kiếm một ngôi nhà mới cho nhân loại khi Trái Đất sắp bị diệt vong.", "android.resource://" + pkg + "/" + R.drawable.interstellar, 8.9));
-        sliderMovies.add(new Movie("s3", "Spider-man: No Way Home", "Khi danh tính bị lộ, Peter Parker nhờ đến phép thuật của Doctor Strange, vô tình mở ra đa vũ trụ và đối mặt với hàng loạt kẻ thù cũ.", "android.resource://" + pkg + "/" + R.drawable.spm_nohome, 8.7));
-        sliderMovies.add(new Movie("s4", "The Dark Knight", "Cuộc đối đầu kinh điển giữa Người Dơi Batman và kẻ phản diện Joker đầy điên loạn trong thành phố tội phạm Gotham đen tối.", "android.resource://" + pkg + "/" + R.drawable.thedarknight, 9.0));
-        sliderMovies.add(new Movie("s5", "Avengers: Endgame", "Trận chiến cuối cùng mang tính sống còn của biệt đội siêu anh hùng chống lại ác nhân Thanos để hồi sinh một nửa sinh linh trong vũ trụ.", "android.resource://" + pkg + "/" + R.drawable.avenger4, 9.0));
+    @Override
+    public void onPause() { super.onPause(); sliderHandler.removeCallbacks(sliderRunnable); }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (sliderAdapter != null && sliderAdapter.getItemCount() > 0) sliderHandler.postDelayed(sliderRunnable, 5000);
     }
 
-    private void loadMoviesWithRealData() {
-        String pkg = requireContext().getPackageName();
-        movieList.add(new Movie("1", "Avatar: The Way of Water", "https://www.youtube.com/watch?v=d9MyW72ELq0", "android.resource://" + pkg + "/" + R.drawable.avatar2, 8.8));
-        movieList.add(new Movie("2", "Avengers: Endgame", "https://www.youtube.com/watch?v=TcMBFSGVi1c", "https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg", 9.0));
-        movieList.add(new Movie("3", "Interstellar", "https://www.youtube.com/watch?v=zSWdZVtXT7E", "android.resource://" + pkg + "/" + R.drawable.interstellar, 8.9));
-        movieList.add(new Movie("5", "Spider-Man: No Way Home", "https://www.youtube.com/watch?v=JfVOs4VSpmA", "android.resource://" + pkg + "/" + R.drawable.spm_nohome, 8.5));
-    }
+    @Override
+    public void onDestroyView() { super.onDestroyView(); sliderHandler.removeCallbacks(sliderRunnable); }
 
     private class SliderAdapter extends RecyclerView.Adapter<SliderAdapter.SliderViewHolder> {
         private List<Movie> movies;
@@ -184,10 +234,12 @@ public class HomeFragment extends Fragment {
             Movie movie = movies.get(position);
             holder.tvTitle.setText(movie.getTieuDe());
             holder.tvDesc.setText(movie.getMoTa());
-            Glide.with(context).load(movie.getAnhBiaUrl()).centerCrop().into(holder.imgSlider);
+            Glide.with(context).load(movie.getBackdropPath()).centerCrop().into(holder.imgSlider);
 
             holder.btnWatchSlider.setOnClickListener(v -> {
                 Intent intent = new Intent(context, MovieDetailActivity.class);
+                // Đóng gói thêm ID phim
+                intent.putExtra("MOVIE_ID", movie.getId());
                 intent.putExtra("MOVIE_TITLE", movie.getTieuDe());
                 intent.putExtra("MOVIE_DESC", movie.getMoTa());
                 intent.putExtra("MOVIE_POSTER", movie.getAnhBiaUrl());
@@ -202,7 +254,6 @@ public class HomeFragment extends Fragment {
             ImageView imgSlider;
             TextView tvTitle, tvDesc;
             Button btnWatchSlider;
-
             public SliderViewHolder(@NonNull View itemView) {
                 super(itemView);
                 imgSlider = itemView.findViewById(R.id.imgSlider);

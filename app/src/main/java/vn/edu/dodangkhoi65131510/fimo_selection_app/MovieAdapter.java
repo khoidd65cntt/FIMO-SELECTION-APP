@@ -7,15 +7,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
-    private List<Movie> movieList;
     private Context context;
+    private List<Movie> movieList;
 
     public MovieAdapter(Context context, List<Movie> movieList) {
         this.context = context;
@@ -25,43 +28,46 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @NonNull
     @Override
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_movie, parent, false);
         return new MovieViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MovieViewHolder holder, int status) {
-        Movie movie = movieList.get(status);
-        holder.tvTitle.setText(movie.getTieuDe());
-        holder.tvRating.setText("⭐ " + movie.getDiemDanhGiaTb());
+    public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
+        Movie movie = movieList.get(position);
 
-        Glide.with(context)
-                .load(movie.getAnhBiaUrl())
-                .centerCrop()
-                .placeholder(android.R.drawable.ic_menu_gallery)
-                .into(holder.imgPoster);
+        if (holder.imgPoster != null) {
+            Glide.with(context).load(movie.getAnhBiaUrl()).centerCrop().into(holder.imgPoster);
+        }
+
+        if (holder.tvTitle != null) {
+            holder.tvTitle.setText(movie.getTieuDe());
+        }
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, MovieDetailActivity.class);
-            intent.putExtra("title", movie.getTieuDe());
-            intent.putExtra("image", movie.getAnhBiaUrl());
-            intent.putExtra("rating", movie.getDiemDanhGiaTb());
-            intent.putExtra("trailer", movie.getMoTa());
+            // Đóng gói thêm ID phim để trang chi tiết gọi API Trailer
+            intent.putExtra("MOVIE_ID", movie.getId());
+            intent.putExtra("MOVIE_TITLE", movie.getTieuDe());
+            intent.putExtra("MOVIE_DESC", movie.getMoTa());
+            intent.putExtra("MOVIE_POSTER", movie.getAnhBiaUrl());
             context.startActivity(intent);
         });
     }
 
     @Override
-    public int getItemCount() { return movieList != null ? movieList.size() : 0; }
+    public int getItemCount() {
+        return movieList != null ? movieList.size() : 0;
+    }
 
-    public static class MovieViewHolder extends RecyclerView.ViewHolder {
+    public class MovieViewHolder extends RecyclerView.ViewHolder {
         ImageView imgPoster;
-        TextView tvTitle, tvRating;
+        TextView tvTitle;
+
         public MovieViewHolder(@NonNull View itemView) {
             super(itemView);
             imgPoster = itemView.findViewById(R.id.imgMoviePoster);
             tvTitle = itemView.findViewById(R.id.tvMovieTitle);
-            tvRating = itemView.findViewById(R.id.tvMovieRating);
         }
     }
 }
