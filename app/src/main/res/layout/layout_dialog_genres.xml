@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#1A1A1A"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CHỌN THỂ LOẠI"
+        android:textColor="#FF9800"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"/>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:useDefaultMargins="true">
+
+        <TextView android:text="Phim Hoạt Hình" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+        <TextView android:text="Phim Âm Nhạc" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+        <TextView android:text="Phim Bí ẩn" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+        <TextView android:text="Phim Chiến Tranh" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+        <TextView android:text="Phim Chính kịch" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+        <TextView android:text="Phim Cổ Trang" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+        <TextView android:text="Phim Gia Đình" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+        <TextView android:text="Phim Hài Hước" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+        <TextView android:text="Phim Hành Động" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+        <TextView android:text="Phim Hình Sự" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+        <TextView android:text="Phim Kinh Dị" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+        <TextView android:text="Phim Phiêu Lưu" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+        <TextView android:text="Phim Tài Liệu" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+        <TextView android:text="Phim Tâm Lý" android:textColor="#FFFFFF" android:textSize="15sp" android:padding="10dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+    </GridLayout>
+</LinearLayout>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#141414"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPagerSlider"
+            android:layout_width="match_parent"
+            android:layout_height="250dp" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayoutDots"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_marginTop="-24dp"
+            android:layout_marginBottom="8dp"
+            android:background="@android:color/transparent"
+            app:tabBackground="@drawable/dot_selector"
+            app:tabGravity="center"
+            app:tabIndicatorHeight="0dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center">
+            <TextView android:id="@+id/tvFilterGenre" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="THỂ LOẠI ˅" android:textColor="#FF9800" android:textStyle="bold" android:padding="8dp"/>
+            <TextView android:id="@+id/tvFilterCountry" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="QUỐC GIA ˅" android:textColor="#FFFFFF" android:textStyle="bold" android:padding="8dp" android:layout_marginStart="16dp"/>
+            <TextView android:id="@+id/tvFilterYear" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="NĂM ˅" android:textColor="#FFFFFF" android:textStyle="bold" android:padding="8dp" android:layout_marginStart="16dp"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thịnh hành"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvBanners"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingHorizontal="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top 10 anime xu hướng"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTop10"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingHorizontal="10dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dành riêng cho bạn"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvForYou"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingHorizontal="10dp"
+            android:layout_marginBottom="16dp" />
+
+        <include layout="@layout/layout_footer" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#1A1A1A"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CHỌN QUỐC GIA"
+        android:textColor="#FF9800"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="300dp">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:useDefaultMargins="true">
+
+            <TextView android:text="Việt Nam" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="Hàn Quốc" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="Trung Quốc" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="Nhật Bản" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="Thái Lan" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="Đài Loan" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="Hồng Kông" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="Ấn Độ" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="Mỹ" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="Anh Quốc" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="Pháp" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="Đức" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="Tây Ban Nha" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="Ý" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+            <TextView android:text="Úc" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+            <TextView android:text="Quốc gia khác" android:textColor="#FFFFFF" android:padding="12dp" android:layout_width="0dp" android:layout_columnWeight="1"/>
+
+        </GridLayout>
+    </ScrollView>
+</LinearLayout>
