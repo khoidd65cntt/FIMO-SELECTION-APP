@@ -3,6 +3,7 @@ package vn.edu.dodangkhoi65131510.fimo_selection_app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,7 @@ public class RegisterActivity extends AppCompatActivity {
         EditText edtRegEmail = findViewById(R.id.edtRegEmail);
         EditText edtRegPassword = findViewById(R.id.edtRegPassword);
         EditText edtRegConfirmPassword = findViewById(R.id.edtRegConfirmPassword);
+        CheckBox cbAgree = findViewById(R.id.cbAgree);
         Button btnRegister = findViewById(R.id.btnRegister);
         TextView tvLogin = findViewById(R.id.tvLogin);
 
@@ -49,6 +51,11 @@ public class RegisterActivity extends AppCompatActivity {
 
             if (password.length() < 6) {
                 Toast.makeText(this, "Mật khẩu phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!cbAgree.isChecked()) {
+                Toast.makeText(this, "Bạn phải đồng ý với Điều kiện sử dụng FIMO để tiếp tục", Toast.LENGTH_LONG).show();
                 return;
             }
 
@@ -76,4 +83,4 @@ public class RegisterActivity extends AppCompatActivity {
 
         tvLogin.setOnClickListener(v -> finish());
     }
-}
+}000
