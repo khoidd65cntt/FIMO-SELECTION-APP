@@ -29,7 +29,12 @@
         <activity android:name=".LoginActivity" android:exported="false" />
         <activity android:name=".RegisterActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
-        <activity android:name=".MovieDetailActivity" android:exported="false" />
+
+        <activity
+            android:name=".MovieDetailActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:exported="false" />
+
         <activity android:name=".AccountInfoActivity" android:exported="false" />
         <activity android:name=".ChangePasswordActivity" android:exported="false" />
 
