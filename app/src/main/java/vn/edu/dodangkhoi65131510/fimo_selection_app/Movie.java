@@ -5,7 +5,6 @@ import java.io.Serializable;
 
 public class Movie implements Serializable {
 
-    // Ánh xạ trực tiếp với các Key trong file JSON của TMDB API
     @SerializedName("id")
     private String id;
 
@@ -27,11 +26,9 @@ public class Movie implements Serializable {
     @SerializedName("release_date")
     private String releaseDate;
 
-    // Các trường dữ liệu tùy biến phục vụ cho Logic nội bộ của App
-    private String trailerKey;   // Chứa ID YouTube cho Popup
-    private String fullMovieUrl; // Chứa link .mp4 cho ExoPlayer
+    private String trailerKey;
+    private String fullMovieUrl;
 
-    // Constructor cơ bản để tương thích ngược với dữ liệu tĩnh hiện tại
     public Movie(String id, String title, String overview, String posterPath, double voteAverage) {
         this.id = id;
         this.title = title;
@@ -40,7 +37,6 @@ public class Movie implements Serializable {
         this.voteAverage = voteAverage;
     }
 
-    // Constructor đầy đủ
     public Movie(String id, String title, String overview, String posterPath, String backdropPath, double voteAverage, String releaseDate) {
         this.id = id;
         this.title = title;
@@ -51,7 +47,6 @@ public class Movie implements Serializable {
         this.releaseDate = releaseDate;
     }
 
-    // ================= GETTERS & SETTERS =================
 
     public String getId() {
         return id;
@@ -77,12 +72,11 @@ public class Movie implements Serializable {
         this.overview = overview;
     }
 
-    // TMDB trả về đường dẫn tương đối, cần nối với Base URL của máy chủ ảnh
     public String getAnhBiaUrl() {
         if (posterPath != null && !posterPath.contains("android.resource") && !posterPath.contains("http")) {
             return "https://image.tmdb.org/t/p/w500" + posterPath;
         }
-        return posterPath; // Dành cho dữ liệu tĩnh hiện tại
+        return posterPath;
     }
 
     public void setAnhBiaUrl(String posterPath) {

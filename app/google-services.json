@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "928854463116",
+    "project_id": "fimo-selection-app",
+    "storage_bucket": "fimo-selection-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:928854463116:android:d4ae07ac7888ed33e361a9",
+        "android_client_info": {
+          "package_name": "vn.edu.dodangkhoi65131510.fimo_selection_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD84EX1R3tNu68cDzWOHEBnhdSRQpbSCBE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

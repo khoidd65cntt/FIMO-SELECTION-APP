@@ -5,46 +5,64 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#141414"
-    tools:context=".LoginActivity">
+    tools:context=".RegisterActivity">
 
     <ImageView
-        android:id="@+id/imgLoginBackground"
+        android:id="@+id/imgRegBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:alpha="0.2"
         android:scaleType="centerCrop"
         android:src="@drawable/screenshot_2026_05_23_150929"
-        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineReg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
+        android:id="@+id/guidelineReg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.35" />
+        app:layout_constraintGuide_percent="0.20" />
 
     <TextView
-        android:id="@+id/tvLoginTitle"
+        android:id="@+id/tvRegTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Đăng nhập"
+        android:text="Đăng ký tài khoản"
         android:textColor="#FFFFFF"
         android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guideline" />
+        app:layout_constraintTop_toBottomOf="@+id/guidelineReg" />
 
     <EditText
-        android:id="@+id/edtEmail"
+        android:id="@+id/edtRegName"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:background="@drawable/bg_input_field"
+        android:hint="Tên hiển thị"
+        android:inputType="textPersonName"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#888888"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvRegTitle" />
+
+    <EditText
+        android:id="@+id/edtRegEmail"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
         android:background="@drawable/bg_input_field"
         android:hint="Nhập Email"
@@ -55,10 +73,10 @@
         android:textColorHint="#888888"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvLoginTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/edtRegName" />
 
     <EditText
-        android:id="@+id/edtPassword"
+        android:id="@+id/edtRegPassword"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginStart="32dp"
@@ -73,63 +91,53 @@
         android:textColorHint="#888888"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtEmail" />
+        app:layout_constraintTop_toBottomOf="@+id/edtRegEmail" />
+
+    <EditText
+        android:id="@+id/edtRegConfirmPassword"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:background="@drawable/bg_input_field"
+        android:hint="Xác nhận Mật khẩu"
+        android:inputType="textPassword"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#888888"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/edtRegPassword" />
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnRegister"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:backgroundTint="#FF5722"
-        android:text="ĐĂNG NHẬP"
+        android:text="ĐĂNG KÝ"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edtPassword" />
+        app:layout_constraintTop_toBottomOf="@+id/edtRegConfirmPassword" />
 
     <TextView
-        android:id="@+id/tvSignUp"
+        android:id="@+id/tvLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Chưa có tài khoản? Đăng ký tại đây"
+        android:text="Đã có tài khoản? Đăng nhập"
         android:textColor="#FF5722"
         android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
-
-    <LinearLayout
-        android:id="@+id/layoutAgreement"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <CheckBox
-            android:id="@+id/cbAgree"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:buttonTint="#FF5722"
-            android:checked="true" />
-
-        <TextView
-            android:id="@+id/tvAgreement"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="Tôi đã đọc và đồng ý với Điều kiện sử dụng FIMO"
-            android:textColor="#AAAAAA"
-            android:textSize="12sp" />
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/btnRegister" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

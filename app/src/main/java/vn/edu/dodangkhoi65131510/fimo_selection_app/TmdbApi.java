@@ -39,7 +39,6 @@ public interface TmdbApi {
             @Query("page") int page
     );
 
-    // [MỚI] API Lấy danh sách Video (Trailer) của một bộ phim cụ thể
     @GET("movie/{movie_id}/videos")
     Call<VideoResponse> getMovieVideos(
             @Path("movie_id") String movieId,
