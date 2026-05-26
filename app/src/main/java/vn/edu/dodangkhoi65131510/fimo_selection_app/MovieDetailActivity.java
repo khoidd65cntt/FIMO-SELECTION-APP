@@ -7,11 +7,15 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +24,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.ui.StyledPlayerView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
@@ -38,20 +50,27 @@ public class MovieDetailActivity extends AppCompatActivity {
     private RecyclerView rvCast;
     private CastAdapter castAdapter;
     private List<CastMember> castList = new ArrayList<>();
+    private ExoPlayer exoPlayer;
+    private StyledPlayerView playerView;
+    private ImageView imgPlayerBackground;
+    private ImageView btnPlayVideo;
+    private Dialog fullscreenDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
 
-        ImageView imgPlayerBackground = findViewById(R.id.imgPlayerBackground);
+        fullscreenDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+
+        imgPlayerBackground = findViewById(R.id.imgPlayerBackground);
+        btnPlayVideo = findViewById(R.id.btnPlayVideo);
+        playerView = findViewById(R.id.playerView);
         ImageView imgDetailPoster = findViewById(R.id.imgDetailPoster);
         TextView tvTitle = findViewById(R.id.tvDetailTitle);
         TextView tvDesc = findViewById(R.id.tvDetailDesc);
         ImageView btnBack = findViewById(R.id.btnBackDetail);
-
         Button btnTrailer = findViewById(R.id.btnTrailer);
-        ImageView btnPlayVideo = findViewById(R.id.btnPlayVideo);
 
         rvCast = findViewById(R.id.rvCast);
         castAdapter = new CastAdapter(castList);
@@ -93,10 +112,152 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         if (btnPlayVideo != null) {
             btnPlayVideo.setOnClickListener(v -> {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.parse("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"), "video/mp4");
-                startActivity(intent);
+                imgPlayerBackground.setVisibility(View.GONE);
+                btnPlayVideo.setVisibility(View.GONE);
+                playerView.setVisibility(View.VISIBLE);
+                Toast.makeText(MovieDetailActivity.this, "Đang lấy dữ liệu video...", Toast.LENGTH_SHORT).show();
+
+                if (movieId != null) {
+                    final boolean[] isLoaded = {false};
+
+                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Movies").child(movieId);
+                    dbRef.child("videoUrl").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (isLoaded[0]) return;
+                            isLoaded[0] = true;
+
+                            String videoUrl = null;
+                            if (snapshot.exists()) {
+                                videoUrl = snapshot.getValue(String.class);
+                            }
+
+                            if (videoUrl == null || videoUrl.isEmpty()) {
+                                videoUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+                            }
+                            initializePlayer(videoUrl);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            if (isLoaded[0]) return;
+                            isLoaded[0] = true;
+                            initializePlayer("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
+                        }
+                    });
+
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (!isLoaded[0]) {
+                            isLoaded[0] = true;
+                            Toast.makeText(MovieDetailActivity.this, "Mạng Firebase yếu, tự động chiếu link dự phòng!", Toast.LENGTH_SHORT).show();
+                            initializePlayer("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
+                        }
+                    }, 3000);
+
+                } else {
+                    initializePlayer("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
+                }
             });
+        }
+
+        fullscreenDialog.setOnDismissListener(dialog -> {
+            if (playerView.getParent() != null) {
+                ((ViewGroup) playerView.getParent()).removeView(playerView);
+            }
+            FrameLayout container = findViewById(R.id.playerContainer);
+            container.addView(playerView);
+        });
+    }
+
+    private void initializePlayer(String videoUrl) {
+        if (exoPlayer == null) {
+            exoPlayer = new ExoPlayer.Builder(this).build();
+            playerView.setPlayer(exoPlayer);
+
+            String cleanUrl = videoUrl.trim();
+            MediaItem mediaItem = MediaItem.fromUri(Uri.parse(cleanUrl));
+
+            exoPlayer.setMediaItem(mediaItem);
+            exoPlayer.prepare();
+            exoPlayer.play();
+
+            ImageView btnVolume = playerView.findViewById(R.id.btnCustomVolume);
+            SeekBar seekVolume = playerView.findViewById(R.id.seekVolume);
+            ImageView btnFullscreen = playerView.findViewById(R.id.btnCustomFullscreen);
+
+            if (seekVolume != null && btnVolume != null) {
+                seekVolume.setProgress((int) (exoPlayer.getVolume() * 100));
+
+                seekVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        if (fromUser) {
+                            exoPlayer.setVolume(progress / 100f);
+                            if (progress == 0) {
+                                btnVolume.setAlpha(0.5f);
+                            } else {
+                                btnVolume.setAlpha(1.0f);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            seekVolume.setVisibility(View.GONE);
+                        }, 2000);
+                    }
+                });
+
+                btnVolume.setOnClickListener(view -> {
+                    if (seekVolume.getVisibility() == View.GONE) {
+                        seekVolume.setVisibility(View.VISIBLE);
+                    } else {
+                        seekVolume.setVisibility(View.GONE);
+                    }
+                });
+            }
+
+            if (btnFullscreen != null) {
+                btnFullscreen.setOnClickListener(view -> {
+                    if (!fullscreenDialog.isShowing()) {
+                        if (playerView.getParent() != null) {
+                            ((ViewGroup) playerView.getParent()).removeView(playerView);
+                        }
+                        fullscreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                        fullscreenDialog.show();
+                    } else {
+                        fullscreenDialog.dismiss();
+                    }
+                });
+            }
+
+            exoPlayer.addListener(new com.google.android.exoplayer2.Player.Listener() {
+                @Override
+                public void onPlayerError(@NonNull com.google.android.exoplayer2.PlaybackException error) {
+                    Toast.makeText(MovieDetailActivity.this, "Lỗi máy ảo không phát được: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (exoPlayer != null) {
+            exoPlayer.release();
+            exoPlayer = null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (exoPlayer != null && exoPlayer.isPlaying()) {
+            exoPlayer.pause();
         }
     }
 
@@ -137,7 +298,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                     castAdapter.notifyDataSetChanged();
                 }
             }
-
             @Override
             public void onFailure(Call<CreditsResponse> call, Throwable t) {}
         });
