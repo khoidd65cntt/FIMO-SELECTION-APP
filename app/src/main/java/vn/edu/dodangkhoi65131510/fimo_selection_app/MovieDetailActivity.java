@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -15,12 +17,16 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,6 +35,9 @@ import retrofit2.Response;
 public class MovieDetailActivity extends AppCompatActivity {
 
     private String youtubeTrailerKey = null;
+    private RecyclerView rvCast;
+    private CastAdapter castAdapter;
+    private List<CastMember> castList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +52,12 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         Button btnTrailer = findViewById(R.id.btnTrailer);
         ImageView btnPlayVideo = findViewById(R.id.btnPlayVideo);
+
+        rvCast = findViewById(R.id.rvCast);
+        castAdapter = new CastAdapter(castList);
+        if (rvCast != null) {
+            rvCast.setAdapter(castAdapter);
+        }
 
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> finish());
@@ -63,6 +78,7 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         if (movieId != null) {
             fetchTrailerKey(movieId);
+            fetchMovieCast(movieId);
         }
 
         if (btnTrailer != null) {
@@ -106,6 +122,27 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void fetchMovieCast(String movieId) {
+        TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
+        apiService.getMovieCredits(movieId, "3509f85d40f81d254b5afc2d8beaa8e1").enqueue(new Callback<CreditsResponse>() {
+            @Override
+            public void onResponse(Call<CreditsResponse> call, Response<CreditsResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCast() != null) {
+                    castList.clear();
+                    if (response.body().getCast().size() > 10) {
+                        castList.addAll(response.body().getCast().subList(0, 10));
+                    } else {
+                        castList.addAll(response.body().getCast());
+                    }
+                    castAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CreditsResponse> call, Throwable t) {}
+        });
+    }
+
     private void showTrailerDialog(String videoId) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_dialog_trailer);
@@ -142,5 +179,53 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         dialog.setOnDismissListener(d -> youTubePlayerView.release());
         dialog.show();
+    }
+
+    private class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
+        private final List<CastMember> list;
+
+        public CastAdapter(List<CastMember> list) {
+            this.list = list;
+        }
+
+        @NonNull
+        @Override
+        public CastViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cast, parent, false);
+            return new CastViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull CastViewHolder holder, int position) {
+            CastMember member = list.get(position);
+            holder.tvName.setText(member.getName());
+
+            String imageUrl = "https://image.tmdb.org/t/p/w185" + member.getProfilePath();
+            if (member.getProfilePath() != null && !member.getProfilePath().isEmpty()) {
+                Glide.with(holder.itemView.getContext())
+                        .load(imageUrl)
+                        .centerCrop()
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .into(holder.imgAvatar);
+            } else {
+                holder.imgAvatar.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return list.size();
+        }
+
+        class CastViewHolder extends RecyclerView.ViewHolder {
+            ImageView imgAvatar;
+            TextView tvName;
+
+            public CastViewHolder(@NonNull View itemView) {
+                super(itemView);
+                imgAvatar = itemView.findViewById(R.id.imgCastAvatar);
+                tvName = itemView.findViewById(R.id.tvCastName);
+            }
+        }
     }
 }

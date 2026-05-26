@@ -83,4 +83,4 @@ public class RegisterActivity extends AppCompatActivity {
 
         tvLogin.setOnClickListener(v -> finish());
     }
-}000
+}

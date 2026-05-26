@@ -44,4 +44,10 @@ public interface TmdbApi {
             @Path("movie_id") String movieId,
             @Query("api_key") String apiKey
     );
+
+    @GET("movie/{movie_id}/credits")
+    Call<CreditsResponse> getMovieCredits(
+            @Path("movie_id") String movieId,
+            @Query("api_key") String apiKey
+    );
 }
