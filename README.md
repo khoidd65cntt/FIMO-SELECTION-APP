@@ -50,9 +50,9 @@ Dự án được xây dựng dựa trên tiêu chuẩn mã nguồn sạch và c
   <table>
     <tr>
       <!-- Bạn thay link via.placeholder bằng link ảnh thực tế sau khi hoàn thành app nhé -->
-      <td><img src="https://github.com/user-attachments/assets/a322bf9d-272e-4b18-929f-27233827dcc0" width="200"></td>
-      <td><img src="https://github.com/user-attachments/assets/dda50f82-be40-49f3-802e-b965e61832f2" width="200"></td>
-      <td><img src="https://via.placeholder.com/200x400/1a1a1a/e50914?text=Movie+Details" width="200"></td>
+      <td><img src="https://github.com/user-attachments/assets/5bb37c0a-2550-49df-a476-fee41868487d" width="200"></td>
+      <td><img src="https://github.com/user-attachments/assets/8fac729d-ac15-4002-8347-042594310190" width="200"></td>
+      <td><img src="https://github.com/user-attachments/assets/832275f7-d0bf-4307-8a40-32108fe34e12" width="200"></td>
     </tr>
     <tr align="center">
       <td><b>Màn hình chính</b></td>
