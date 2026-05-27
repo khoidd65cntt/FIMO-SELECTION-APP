@@ -19,10 +19,17 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     private Context context;
     private List<Movie> movieList;
+    private String mediaType = "movie";
 
     public MovieAdapter(Context context, List<Movie> movieList) {
         this.context = context;
         this.movieList = movieList;
+    }
+
+    public MovieAdapter(Context context, List<Movie> movieList, String mediaType) {
+        this.context = context;
+        this.movieList = movieList;
+        this.mediaType = mediaType;
     }
 
     @NonNull
@@ -46,11 +53,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, MovieDetailActivity.class);
-            // Đóng gói thêm ID phim để trang chi tiết gọi API Trailer
-            intent.putExtra("MOVIE_ID", movie.getId());
+            intent.putExtra("MOVIE_ID", String.valueOf(movie.getId()));
             intent.putExtra("MOVIE_TITLE", movie.getTieuDe());
             intent.putExtra("MOVIE_DESC", movie.getMoTa());
             intent.putExtra("MOVIE_POSTER", movie.getAnhBiaUrl());
+            intent.putExtra("MEDIA_TYPE", mediaType);
             context.startActivity(intent);
         });
     }

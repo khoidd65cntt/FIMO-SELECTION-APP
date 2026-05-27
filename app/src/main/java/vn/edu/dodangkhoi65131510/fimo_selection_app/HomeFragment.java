@@ -98,8 +98,9 @@ public class HomeFragment extends Fragment {
         movieList = new ArrayList<>();
         animeList = new ArrayList<>();
 
-        movieAdapter = new MovieAdapter(requireContext(), movieList);
-        animeAdapter = new MovieAdapter(requireContext(), animeList);
+        // TRUYỀN BIẾN PHÂN LOẠI VÀO ĐÂY ĐỂ TRÁNH LỖI PHIM MA
+        movieAdapter = new MovieAdapter(requireContext(), movieList, "movie");
+        animeAdapter = new MovieAdapter(requireContext(), animeList, "tv");
 
         setupRecyclerView(rvBanners, movieAdapter);
         setupRecyclerView(rvTop10, animeAdapter);
@@ -238,11 +239,12 @@ public class HomeFragment extends Fragment {
 
             holder.btnWatchSlider.setOnClickListener(v -> {
                 Intent intent = new Intent(context, MovieDetailActivity.class);
-                // Đóng gói thêm ID phim
-                intent.putExtra("MOVIE_ID", movie.getId());
+                intent.putExtra("MOVIE_ID", String.valueOf(movie.getId()));
                 intent.putExtra("MOVIE_TITLE", movie.getTieuDe());
                 intent.putExtra("MOVIE_DESC", movie.getMoTa());
                 intent.putExtra("MOVIE_POSTER", movie.getAnhBiaUrl());
+                // Cố định Slider là phim lẻ
+                intent.putExtra("MEDIA_TYPE", "movie");
                 context.startActivity(intent);
             });
         }

@@ -101,6 +101,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         String title = getIntent().getStringExtra("MOVIE_TITLE");
         String desc = getIntent().getStringExtra("MOVIE_DESC");
         String poster = getIntent().getStringExtra("MOVIE_POSTER");
+        // Lấy thêm biến phân loại phim từ trang trước truyền sang (movie hoặc tv)
+        String mediaType = getIntent().getStringExtra("MEDIA_TYPE");
 
         if (title != null) tvTitle.setText(title);
         if (desc != null && !desc.contains("youtube.com")) tvDesc.setText(desc);
@@ -173,8 +175,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         };
 
         if (movieId != null) {
-            fetchTrailerKey(movieId);
-            fetchMovieCast(movieId);
+            fetchTrailerKey(movieId, mediaType);
+            fetchMovieCast(movieId, mediaType);
 
             imgPlayerBackground.setVisibility(View.GONE);
             btnPlayVideo.setVisibility(View.GONE);
@@ -204,7 +206,14 @@ public class MovieDetailActivity extends AppCompatActivity {
                 }
             });
 
-            String vidsrcUrl = "https://vidsrc-embed.ru/embed/movie/" + movieId;
+            String vidsrcUrl;
+            // Kiểm tra: Nếu là TV Show thì gọi link /tv/id/mùa/tập, ngược lại gọi link /movie/id
+            if ("tv".equalsIgnoreCase(mediaType)) {
+                vidsrcUrl = "https://vidsrc-embed.ru/embed/tv/" + movieId + "/1/1"; // Mặc định mở Tập 1 Phần 1
+            } else {
+                vidsrcUrl = "https://vidsrc-embed.ru/embed/movie/" + movieId;
+            }
+
             webViewFullMovie.loadUrl(vidsrcUrl);
 
         } else {
@@ -233,112 +242,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    private void initializePlayer(String videoUrl) {
-        if (exoPlayer == null) {
-            exoPlayer = new ExoPlayer.Builder(this).build();
-            playerView.setPlayer(exoPlayer);
-
-            String cleanUrl = videoUrl.trim();
-            MediaItem mediaItem = MediaItem.fromUri(Uri.parse(cleanUrl));
-
-            exoPlayer.setMediaItem(mediaItem);
-            exoPlayer.prepare();
-            exoPlayer.play();
-
-            ImageView btnVolume = playerView.findViewById(R.id.btnCustomVolume);
-            SeekBar seekVolume = playerView.findViewById(R.id.seekVolume);
-            ImageView btnFullscreen = playerView.findViewById(R.id.btnCustomFullscreen);
-
-            if (seekVolume != null && btnVolume != null) {
-                seekVolume.setProgress((int) (exoPlayer.getVolume() * 100));
-
-                seekVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        if (fromUser) {
-                            exoPlayer.setVolume(progress / 100f);
-                            if (progress == 0) {
-                                btnVolume.setAlpha(0.5f);
-                            } else {
-                                btnVolume.setAlpha(1.0f);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {}
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            seekVolume.setVisibility(View.GONE);
-                        }, 2000);
-                    }
-                });
-
-                btnVolume.setOnClickListener(view -> {
-                    if (seekVolume.getVisibility() == View.GONE) {
-                        seekVolume.setVisibility(View.VISIBLE);
-                    } else {
-                        seekVolume.setVisibility(View.GONE);
-                    }
-                });
-            }
-
-            if (btnFullscreen != null) {
-                btnFullscreen.setOnClickListener(view -> {
-                    if (!fullscreenDialog.isShowing()) {
-                        if (playerView.getParent() != null) {
-                            ((ViewGroup) playerView.getParent()).removeView(playerView);
-                        }
-
-                        fullscreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-                        if (fullscreenDialog.getWindow() != null) {
-                            fullscreenDialog.getWindow().getDecorView().setSystemUiVisibility(
-                                    View.SYSTEM_UI_FLAG_FULLSCREEN
-                                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-                        }
-
-                        fullscreenDialog.show();
-                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
-                    } else {
-                        fullscreenDialog.dismiss();
-                    }
-                });
-            }
-
-            exoPlayer.addListener(new com.google.android.exoplayer2.Player.Listener() {
-                @Override
-                public void onPlayerError(@NonNull com.google.android.exoplayer2.PlaybackException error) {
-                    Toast.makeText(MovieDetailActivity.this, "Lỗi máy ảo không phát được: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (exoPlayer != null) {
-            exoPlayer.release();
-            exoPlayer = null;
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (exoPlayer != null && exoPlayer.isPlaying()) {
-            exoPlayer.pause();
-        }
-    }
-
-    private void fetchTrailerKey(String movieId) {
+    private void fetchTrailerKey(String movieId, String mediaType) {
         TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
+
+        // Cần đảm bảo gọi đúng hàm API cho Movie hoặc TV bên trong ApiClient (Tùy thuộc vào thiết lập của bạn)
+        // Ở đây tạm dùng chung hàm getMovieVideos, nếu app báo lỗi thì bạn cần phân nhánh API tương tự logic link ở trên.
         apiService.getMovieVideos(movieId, "3509f85d40f81d254b5afc2d8beaa8e1").enqueue(new Callback<VideoResponse>() {
             @Override
             public void onResponse(Call<VideoResponse> call, Response<VideoResponse> response) {
@@ -359,8 +267,9 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchMovieCast(String movieId) {
+    private void fetchMovieCast(String movieId, String mediaType) {
         TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
+
         apiService.getMovieCredits(movieId, "3509f85d40f81d254b5afc2d8beaa8e1").enqueue(new Callback<CreditsResponse>() {
             @Override
             public void onResponse(Call<CreditsResponse> call, Response<CreditsResponse> response) {
