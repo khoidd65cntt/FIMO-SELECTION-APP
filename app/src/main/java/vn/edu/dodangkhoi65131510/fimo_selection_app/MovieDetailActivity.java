@@ -10,9 +10,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -53,9 +59,16 @@ public class MovieDetailActivity extends AppCompatActivity {
     private List<CastMember> castList = new ArrayList<>();
     private ExoPlayer exoPlayer;
     private StyledPlayerView playerView;
+    private WebView webViewFullMovie;
     private ImageView imgPlayerBackground;
     private ImageView btnPlayVideo;
     private Dialog fullscreenDialog;
+
+    private View mCustomView;
+    private WebChromeClient.CustomViewCallback mCustomViewCallback;
+    private int mOriginalOrientation;
+    private int mOriginalSystemUiVisibility;
+    private WebChromeClient webChromeClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +80,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         imgPlayerBackground = findViewById(R.id.imgPlayerBackground);
         btnPlayVideo = findViewById(R.id.btnPlayVideo);
         playerView = findViewById(R.id.playerView);
+        webViewFullMovie = findViewById(R.id.webViewFullMovie);
         ImageView imgDetailPoster = findViewById(R.id.imgDetailPoster);
         TextView tvTitle = findViewById(R.id.tvDetailTitle);
         TextView tvDesc = findViewById(R.id.tvDetailDesc);
@@ -96,11 +110,6 @@ public class MovieDetailActivity extends AppCompatActivity {
             if (imgDetailPoster != null) Glide.with(this).load(poster).centerCrop().into(imgDetailPoster);
         }
 
-        if (movieId != null) {
-            fetchTrailerKey(movieId);
-            fetchMovieCast(movieId);
-        }
-
         if (btnTrailer != null) {
             btnTrailer.setOnClickListener(v -> {
                 if (youtubeTrailerKey != null) {
@@ -111,54 +120,95 @@ public class MovieDetailActivity extends AppCompatActivity {
             });
         }
 
-        if (btnPlayVideo != null) {
-            btnPlayVideo.setOnClickListener(v -> {
-                imgPlayerBackground.setVisibility(View.GONE);
-                btnPlayVideo.setVisibility(View.GONE);
-                playerView.setVisibility(View.VISIBLE);
-                Toast.makeText(MovieDetailActivity.this, "Đang lấy dữ liệu video...", Toast.LENGTH_SHORT).show();
+        webChromeClient = new WebChromeClient() {
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                return true;
+            }
 
-                if (movieId != null) {
-                    final boolean[] isLoaded = {false};
+            @Override
+            public void onShowCustomView(View view, CustomViewCallback callback) {
+                if (mCustomView != null) {
+                    callback.onCustomViewHidden();
+                    return;
+                }
 
-                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Movies").child(movieId);
-                    dbRef.child("videoUrl").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (isLoaded[0]) return;
-                            isLoaded[0] = true;
+                mOriginalOrientation = getRequestedOrientation();
+                FrameLayout decor = (FrameLayout) getWindow().getDecorView();
+                mOriginalSystemUiVisibility = decor.getSystemUiVisibility();
 
-                            String videoUrl = null;
-                            if (snapshot.exists()) {
-                                videoUrl = snapshot.getValue(String.class);
-                            }
+                mCustomView = view;
+                decor.addView(mCustomView, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-                            if (videoUrl == null || videoUrl.isEmpty()) {
-                                videoUrl = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
-                            }
-                            initializePlayer(videoUrl);
-                        }
+                decor.setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            if (isLoaded[0]) return;
-                            isLoaded[0] = true;
-                            initializePlayer("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
-                        }
-                    });
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                mCustomViewCallback = callback;
+            }
 
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        if (!isLoaded[0]) {
-                            isLoaded[0] = true;
-                            Toast.makeText(MovieDetailActivity.this, "Mạng Firebase yếu, tự động chiếu link dự phòng!", Toast.LENGTH_SHORT).show();
-                            initializePlayer("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
-                        }
-                    }, 3000);
+            @Override
+            public void onHideCustomView() {
+                if (mCustomView == null) {
+                    return;
+                }
 
-                } else {
-                    initializePlayer("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
+                FrameLayout decor = (FrameLayout) getWindow().getDecorView();
+                decor.removeView(mCustomView);
+                mCustomView = null;
+
+                decor.setSystemUiVisibility(mOriginalSystemUiVisibility);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+                if (mCustomViewCallback != null) {
+                    mCustomViewCallback.onCustomViewHidden();
+                    mCustomViewCallback = null;
+                }
+            }
+        };
+
+        if (movieId != null) {
+            fetchTrailerKey(movieId);
+            fetchMovieCast(movieId);
+
+            imgPlayerBackground.setVisibility(View.GONE);
+            btnPlayVideo.setVisibility(View.GONE);
+            playerView.setVisibility(View.GONE);
+            webViewFullMovie.setVisibility(View.VISIBLE);
+
+            WebSettings webSettings = webViewFullMovie.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+            webSettings.setDomStorageEnabled(true);
+            webSettings.setMediaPlaybackRequiresUserGesture(false);
+            webSettings.setJavaScriptCanOpenWindowsAutomatically(false);
+            webSettings.setSupportMultipleWindows(true);
+
+            webViewFullMovie.setWebChromeClient(webChromeClient);
+
+            webViewFullMovie.setWebViewClient(new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                    String url = request.getUrl().toString();
+                    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                        return true;
+                    }
+                    if (url.contains("shopee") || url.contains("lazada") || url.contains("bet")) {
+                        return true;
+                    }
+                    return false;
                 }
             });
+
+            String vidsrcUrl = "https://vidsrc-embed.ru/embed/movie/" + movieId;
+            webViewFullMovie.loadUrl(vidsrcUrl);
+
+        } else {
+            Toast.makeText(MovieDetailActivity.this, "Không tìm thấy ID phim!", Toast.LENGTH_SHORT).show();
         }
 
         fullscreenDialog.setOnDismissListener(dialog -> {
@@ -168,9 +218,19 @@ public class MovieDetailActivity extends AppCompatActivity {
             FrameLayout container = findViewById(R.id.playerContainer);
             container.addView(playerView);
 
-            // Xoay màn hình về lại dọc khi tắt Fullscreen
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mCustomView != null) {
+            if (webChromeClient != null) {
+                webChromeClient.onHideCustomView();
+            }
+            return;
+        }
+        super.onBackPressed();
     }
 
     private void initializePlayer(String videoUrl) {
@@ -234,7 +294,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                         fullscreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-                        // Ẩn thanh trạng thái và thanh điều hướng để mở rộng 100% diện tích phim
                         if (fullscreenDialog.getWindow() != null) {
                             fullscreenDialog.getWindow().getDecorView().setSystemUiVisibility(
                                     View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -245,7 +304,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                         }
 
                         fullscreenDialog.show();
-                        // Ép màn hình xoay ngang
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
                     } else {
                         fullscreenDialog.dismiss();
