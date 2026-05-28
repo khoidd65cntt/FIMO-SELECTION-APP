@@ -34,6 +34,8 @@ import com.bumptech.glide.Glide;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.ui.StyledPlayerView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,6 +47,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -87,6 +90,12 @@ public class MovieDetailActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBackDetail);
         Button btnTrailer = findViewById(R.id.btnTrailer);
 
+        ImageView btnFavorite = null;
+        int favId = getResources().getIdentifier("btnFavorite", "id", getPackageName());
+        if (favId != 0) {
+            btnFavorite = findViewById(favId);
+        }
+
         rvCast = findViewById(R.id.rvCast);
         castAdapter = new CastAdapter(castList);
         if (rvCast != null) {
@@ -101,7 +110,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         String title = getIntent().getStringExtra("MOVIE_TITLE");
         String desc = getIntent().getStringExtra("MOVIE_DESC");
         String poster = getIntent().getStringExtra("MOVIE_POSTER");
-        // Lấy thêm biến phân loại phim từ trang trước truyền sang (movie hoặc tv)
         String mediaType = getIntent().getStringExtra("MEDIA_TYPE");
 
         if (title != null) tvTitle.setText(title);
@@ -120,6 +128,49 @@ public class MovieDetailActivity extends AppCompatActivity {
                     Toast.makeText(this, "Đang tải Trailer, vui lòng thử lại sau vài giây!", Toast.LENGTH_SHORT).show();
                 }
             });
+        }
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        if (user != null && movieId != null && btnFavorite != null) {
+            DatabaseReference favRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("Favorites").child(movieId);
+
+            ImageView finalBtnFavorite = btnFavorite;
+            favRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        finalBtnFavorite.setColorFilter(Color.RED);
+                    } else {
+                        finalBtnFavorite.setColorFilter(Color.WHITE);
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {}
+            });
+
+            btnFavorite.setOnClickListener(v -> {
+                favRef.get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (task.getResult().exists()) {
+                            favRef.removeValue();
+                            Toast.makeText(MovieDetailActivity.this, "Đã bỏ yêu thích", Toast.LENGTH_SHORT).show();
+                        } else {
+                            HashMap<String, String> favData = new HashMap<>();
+                            favData.put("id", movieId);
+                            favData.put("title", title);
+                            favData.put("desc", desc);
+                            favData.put("poster", poster);
+                            favData.put("mediaType", mediaType);
+                            favRef.setValue(favData);
+                            Toast.makeText(MovieDetailActivity.this, "Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            });
+        } else if (btnFavorite != null) {
+            btnFavorite.setOnClickListener(v -> Toast.makeText(MovieDetailActivity.this, "Vui lòng đăng nhập để sử dụng", Toast.LENGTH_SHORT).show());
         }
 
         webChromeClient = new WebChromeClient() {
@@ -207,9 +258,8 @@ public class MovieDetailActivity extends AppCompatActivity {
             });
 
             String vidsrcUrl;
-            // Kiểm tra: Nếu là TV Show thì gọi link /tv/id/mùa/tập, ngược lại gọi link /movie/id
             if ("tv".equalsIgnoreCase(mediaType)) {
-                vidsrcUrl = "https://vidsrc-embed.ru/embed/tv/" + movieId + "/1/1"; // Mặc định mở Tập 1 Phần 1
+                vidsrcUrl = "https://vidsrc-embed.ru/embed/tv/" + movieId + "/1/1";
             } else {
                 vidsrcUrl = "https://vidsrc-embed.ru/embed/movie/" + movieId;
             }
@@ -245,8 +295,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void fetchTrailerKey(String movieId, String mediaType) {
         TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
 
-        // Cần đảm bảo gọi đúng hàm API cho Movie hoặc TV bên trong ApiClient (Tùy thuộc vào thiết lập của bạn)
-        // Ở đây tạm dùng chung hàm getMovieVideos, nếu app báo lỗi thì bạn cần phân nhánh API tương tự logic link ở trên.
         apiService.getMovieVideos(movieId, "3509f85d40f81d254b5afc2d8beaa8e1").enqueue(new Callback<VideoResponse>() {
             @Override
             public void onResponse(Call<VideoResponse> call, Response<VideoResponse> response) {
