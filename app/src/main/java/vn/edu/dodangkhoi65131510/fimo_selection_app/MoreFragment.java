@@ -95,7 +95,14 @@ public class MoreFragment extends Fragment {
             startActivity(intent);
         });
 
-        btnLibrary.setOnClickListener(v -> Toast.makeText(requireContext(), "Mở Thư viện", Toast.LENGTH_SHORT).show());
+        btnLibrary.setOnClickListener(v -> {
+            if (mAuth.getCurrentUser() == null) {
+                startActivity(new Intent(requireContext(), LoginActivity.class));
+            } else {
+                startActivity(new Intent(requireContext(), HistoryActivity.class));
+            }
+        });
+
         btnGift.setOnClickListener(v -> Toast.makeText(requireContext(), "Nhập mã quà tặng", Toast.LENGTH_SHORT).show());
 
         btnFavorites.setOnClickListener(v -> {

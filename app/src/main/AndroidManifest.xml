@@ -38,6 +38,9 @@
         <activity android:name=".AccountInfoActivity" android:exported="false" />
         <activity android:name=".ChangePasswordActivity" android:exported="false" />
 
+        <activity android:name=".FavoritesActivity" android:exported="false" />
+        <activity android:name=".HistoryActivity" android:exported="false" />
+
     </application>
 
 </manifest>

@@ -160,14 +160,14 @@
             app:layout_constraintTop_toBottomOf="@+id/cardPoster" />
 
         <Button
-            android:id="@+id/btnShare"
+            android:id="@+id/btnFavorite"
             android:layout_width="0dp"
             android:layout_height="45dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:backgroundTint="#333333"
-            android:text="Chia sẻ"
+            android:text="Yêu thích"
             android:textColor="#FFFFFF"
             app:layout_constraintEnd_toStartOf="@+id/btnTrailer"
             app:layout_constraintStart_toStartOf="parent"
@@ -182,10 +182,10 @@
             android:backgroundTint="#E50914"
             android:text="Trailer"
             android:textColor="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="@+id/btnShare"
+            app:layout_constraintBottom_toBottomOf="@+id/btnFavorite"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/btnShare"
-            app:layout_constraintTop_toTopOf="@+id/btnShare" />
+            app:layout_constraintStart_toEndOf="@+id/btnFavorite"
+            app:layout_constraintTop_toTopOf="@+id/btnFavorite" />
 
         <TextView
             android:id="@+id/tvCastTitle"
@@ -198,7 +198,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnShare" />
+            app:layout_constraintTop_toBottomOf="@+id/btnFavorite" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvCast"
@@ -281,7 +281,7 @@
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="12dp" android:text="THỂ LOẠI TRUYỀN HÌNH" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="10dp" android:text="Chương trình Phổ biến" android:textColor="#CCCCCC" android:textSize="13sp" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="10dp" android:text="Phát sóng Hôm nay" android:textColor="#CCCCCC" android:textSize="13sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="10dp" android:text="Phat sóng Hôm nay" android:textColor="#CCCCCC" android:textSize="13sp" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="20dp" android:text="Đánh giá cao" android:textColor="#CCCCCC" android:textSize="13sp" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="12dp" android:text="MẠNG LƯỚI CỦA CHÚNG TÔI" android:textColor="#888888" android:textSize="12sp" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="10dp" android:text="FIMO Network" android:textColor="#CCCCCC" android:textSize="13sp" />

@@ -26,6 +26,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -73,6 +74,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     private int mOriginalSystemUiVisibility;
     private WebChromeClient webChromeClient;
 
+    // Khai báo đường link DB Singapore
+    private static final String DB_URL = "https://fimo-selection-app-default-rtdb.asia-southeast1.firebasedatabase.app";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,11 +94,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         ImageView btnBack = findViewById(R.id.btnBackDetail);
         Button btnTrailer = findViewById(R.id.btnTrailer);
 
-        ImageView btnFavorite = null;
-        int favId = getResources().getIdentifier("btnFavorite", "id", getPackageName());
-        if (favId != 0) {
-            btnFavorite = findViewById(favId);
-        }
+        // Đã cập nhật: Ánh xạ btnFavorite dưới dạng Button
+        Button btnFavorite = findViewById(R.id.btnFavorite);
 
         rvCast = findViewById(R.id.rvCast);
         castAdapter = new CastAdapter(castList);
@@ -106,11 +107,25 @@ public class MovieDetailActivity extends AppCompatActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (mCustomView != null) {
+                    if (webChromeClient != null) {
+                        webChromeClient.onHideCustomView();
+                    }
+                } else {
+                    finish();
+                }
+            }
+        });
+
         String movieId = getIntent().getStringExtra("MOVIE_ID");
         String title = getIntent().getStringExtra("MOVIE_TITLE");
         String desc = getIntent().getStringExtra("MOVIE_DESC");
         String poster = getIntent().getStringExtra("MOVIE_POSTER");
-        String mediaType = getIntent().getStringExtra("MEDIA_TYPE");
+        String tempMediaType = getIntent().getStringExtra("MEDIA_TYPE");
+        final String mediaType = (tempMediaType != null) ? tempMediaType : "movie";
 
         if (title != null) tvTitle.setText(title);
         if (desc != null && !desc.contains("youtube.com")) tvDesc.setText(desc);
@@ -133,30 +148,39 @@ public class MovieDetailActivity extends AppCompatActivity {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
 
+        // Xử lý logic nút Yêu thích
         if (user != null && movieId != null && btnFavorite != null) {
-            DatabaseReference favRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("Favorites").child(movieId);
+            DatabaseReference favRef = FirebaseDatabase.getInstance(DB_URL)
+                    .getReference("Users").child(user.getUid()).child("Favorites").child(movieId);
 
-            ImageView finalBtnFavorite = btnFavorite;
+            // Kiểm tra trạng thái hiện tại trên Firebase để cập nhật UI
             favRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
-                        finalBtnFavorite.setColorFilter(Color.RED);
+                        // Nếu đã yêu thích: Đổi chữ và màu
+                        btnFavorite.setText("Đã yêu thích");
+                        btnFavorite.setTextColor(Color.parseColor("#E50914")); // Màu đỏ
                     } else {
-                        finalBtnFavorite.setColorFilter(Color.WHITE);
+                        // Nếu chưa yêu thích
+                        btnFavorite.setText("Yêu thích");
+                        btnFavorite.setTextColor(Color.WHITE);
                     }
                 }
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {}
             });
 
+            // Sự kiện Click
             btnFavorite.setOnClickListener(v -> {
                 favRef.get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (task.getResult().exists()) {
+                            // Xóa khỏi danh sách yêu thích
                             favRef.removeValue();
                             Toast.makeText(MovieDetailActivity.this, "Đã bỏ yêu thích", Toast.LENGTH_SHORT).show();
                         } else {
+                            // Thêm vào danh sách yêu thích
                             HashMap<String, String> favData = new HashMap<>();
                             favData.put("id", movieId);
                             favData.put("title", title);
@@ -170,7 +194,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                 });
             });
         } else if (btnFavorite != null) {
-            btnFavorite.setOnClickListener(v -> Toast.makeText(MovieDetailActivity.this, "Vui lòng đăng nhập để sử dụng", Toast.LENGTH_SHORT).show());
+            btnFavorite.setOnClickListener(v -> Toast.makeText(MovieDetailActivity.this, "Vui lòng đăng nhập để sử dụng chức năng này", Toast.LENGTH_SHORT).show());
         }
 
         webChromeClient = new WebChromeClient() {
@@ -226,45 +250,75 @@ public class MovieDetailActivity extends AppCompatActivity {
         };
 
         if (movieId != null) {
-            fetchTrailerKey(movieId, mediaType);
-            fetchMovieCast(movieId, mediaType);
+            fetchTrailerKey(movieId);
+            fetchMovieCast(movieId);
 
-            imgPlayerBackground.setVisibility(View.GONE);
-            btnPlayVideo.setVisibility(View.GONE);
-            playerView.setVisibility(View.GONE);
-            webViewFullMovie.setVisibility(View.VISIBLE);
+            if (btnPlayVideo != null) {
+                btnPlayVideo.setOnClickListener(v -> {
+                    imgPlayerBackground.setVisibility(View.GONE);
+                    btnPlayVideo.setVisibility(View.GONE);
 
-            WebSettings webSettings = webViewFullMovie.getSettings();
-            webSettings.setJavaScriptEnabled(true);
-            webSettings.setDomStorageEnabled(true);
-            webSettings.setMediaPlaybackRequiresUserGesture(false);
-            webSettings.setJavaScriptCanOpenWindowsAutomatically(false);
-            webSettings.setSupportMultipleWindows(true);
+                    if (movieId != null) {
+                        playerView.setVisibility(View.GONE);
+                        webViewFullMovie.setVisibility(View.VISIBLE);
 
-            webViewFullMovie.setWebChromeClient(webChromeClient);
+                        WebSettings webSettings = webViewFullMovie.getSettings();
+                        webSettings.setJavaScriptEnabled(true);
+                        webSettings.setDomStorageEnabled(true);
+                        webSettings.setMediaPlaybackRequiresUserGesture(false);
+                        webSettings.setJavaScriptCanOpenWindowsAutomatically(false);
+                        webSettings.setSupportMultipleWindows(true);
 
-            webViewFullMovie.setWebViewClient(new WebViewClient() {
-                @Override
-                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                    String url = request.getUrl().toString();
-                    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                        return true;
+                        webViewFullMovie.setWebChromeClient(webChromeClient);
+
+                        webViewFullMovie.setWebViewClient(new WebViewClient() {
+                            @Override
+                            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                                String url = request.getUrl().toString();
+                                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                                    return true;
+                                }
+                                if (url.contains("shopee") || url.contains("lazada") || url.contains("bet")) {
+                                    return true;
+                                }
+                                return false;
+                            }
+                        });
+
+                        String vidsrcUrl;
+                        if ("tv".equalsIgnoreCase(mediaType)) {
+                            vidsrcUrl = "https://vidsrc-embed.ru/embed/tv/" + movieId + "/1/1";
+                        } else {
+                            vidsrcUrl = "https://vidsrc-embed.ru/embed/movie/" + movieId;
+                        }
+                        webViewFullMovie.loadUrl(vidsrcUrl);
+
+                        Toast.makeText(MovieDetailActivity.this, "Đang tải nguồn phim...", Toast.LENGTH_SHORT).show();
+
+                        // Ép link DB cho phần lưu Lịch sử khi nhấn Play
+                        if (user != null) {
+                            DatabaseReference historyRef = FirebaseDatabase.getInstance(DB_URL)
+                                    .getReference("Users")
+                                    .child(user.getUid())
+                                    .child("History")
+                                    .child(movieId);
+
+                            HashMap<String, Object> historyData = new HashMap<>();
+                            historyData.put("id", movieId);
+                            historyData.put("title", title != null ? title : "Phim không tên");
+                            historyData.put("desc", desc != null ? desc : "");
+                            historyData.put("poster", poster != null ? poster : "");
+                            historyData.put("mediaType", mediaType);
+                            historyData.put("timestamp", System.currentTimeMillis());
+
+                            historyRef.setValue(historyData);
+                        }
+
+                    } else {
+                        Toast.makeText(MovieDetailActivity.this, "Không tìm thấy ID phim!", Toast.LENGTH_SHORT).show();
                     }
-                    if (url.contains("shopee") || url.contains("lazada") || url.contains("bet")) {
-                        return true;
-                    }
-                    return false;
-                }
-            });
-
-            String vidsrcUrl;
-            if ("tv".equalsIgnoreCase(mediaType)) {
-                vidsrcUrl = "https://vidsrc-embed.ru/embed/tv/" + movieId + "/1/1";
-            } else {
-                vidsrcUrl = "https://vidsrc-embed.ru/embed/movie/" + movieId;
+                });
             }
-
-            webViewFullMovie.loadUrl(vidsrcUrl);
 
         } else {
             Toast.makeText(MovieDetailActivity.this, "Không tìm thấy ID phim!", Toast.LENGTH_SHORT).show();
@@ -281,20 +335,112 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        if (mCustomView != null) {
-            if (webChromeClient != null) {
-                webChromeClient.onHideCustomView();
+    private void initializePlayer(String videoUrl) {
+        if (exoPlayer == null) {
+            exoPlayer = new ExoPlayer.Builder(this).build();
+            playerView.setPlayer(exoPlayer);
+
+            String cleanUrl = videoUrl.trim();
+            MediaItem mediaItem = MediaItem.fromUri(Uri.parse(cleanUrl));
+
+            exoPlayer.setMediaItem(mediaItem);
+            exoPlayer.prepare();
+            exoPlayer.play();
+
+            ImageView btnVolume = playerView.findViewById(R.id.btnCustomVolume);
+            SeekBar seekVolume = playerView.findViewById(R.id.seekVolume);
+            ImageView btnFullscreen = playerView.findViewById(R.id.btnCustomFullscreen);
+
+            if (seekVolume != null && btnVolume != null) {
+                seekVolume.setProgress((int) (exoPlayer.getVolume() * 100));
+
+                seekVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        if (fromUser) {
+                            exoPlayer.setVolume(progress / 100f);
+                            if (progress == 0) {
+                                btnVolume.setAlpha(0.5f);
+                            } else {
+                                btnVolume.setAlpha(1.0f);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            seekVolume.setVisibility(View.GONE);
+                        }, 2000);
+                    }
+                });
+
+                btnVolume.setOnClickListener(view -> {
+                    if (seekVolume.getVisibility() == View.GONE) {
+                        seekVolume.setVisibility(View.VISIBLE);
+                    } else {
+                        seekVolume.setVisibility(View.GONE);
+                    }
+                });
             }
-            return;
+
+            if (btnFullscreen != null) {
+                btnFullscreen.setOnClickListener(view -> {
+                    if (!fullscreenDialog.isShowing()) {
+                        if (playerView.getParent() != null) {
+                            ((ViewGroup) playerView.getParent()).removeView(playerView);
+                        }
+
+                        fullscreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+                        if (fullscreenDialog.getWindow() != null) {
+                            fullscreenDialog.getWindow().getDecorView().setSystemUiVisibility(
+                                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                        }
+
+                        fullscreenDialog.show();
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                    } else {
+                        fullscreenDialog.dismiss();
+                    }
+                });
+            }
+
+            exoPlayer.addListener(new com.google.android.exoplayer2.Player.Listener() {
+                @Override
+                public void onPlayerError(@NonNull com.google.android.exoplayer2.PlaybackException error) {
+                    Toast.makeText(MovieDetailActivity.this, "Lỗi máy ảo không phát được: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
         }
-        super.onBackPressed();
     }
 
-    private void fetchTrailerKey(String movieId, String mediaType) {
-        TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (exoPlayer != null) {
+            exoPlayer.release();
+            exoPlayer = null;
+        }
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (exoPlayer != null && exoPlayer.isPlaying()) {
+            exoPlayer.pause();
+        }
+    }
+
+    private void fetchTrailerKey(String movieId) {
+        TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
         apiService.getMovieVideos(movieId, "3509f85d40f81d254b5afc2d8beaa8e1").enqueue(new Callback<VideoResponse>() {
             @Override
             public void onResponse(Call<VideoResponse> call, Response<VideoResponse> response) {
@@ -315,9 +461,8 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchMovieCast(String movieId, String mediaType) {
+    private void fetchMovieCast(String movieId) {
         TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
-
         apiService.getMovieCredits(movieId, "3509f85d40f81d254b5afc2d8beaa8e1").enqueue(new Callback<CreditsResponse>() {
             @Override
             public void onResponse(Call<CreditsResponse> call, Response<CreditsResponse> response) {
