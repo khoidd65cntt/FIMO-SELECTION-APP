@@ -61,6 +61,12 @@ public class HistoryActivity extends AppCompatActivity {
         loadHistory();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ThemeHelper.applyTheme(this);
+    }
+
     private void loadHistory() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {

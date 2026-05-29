@@ -50,4 +50,15 @@ public interface TmdbApi {
             @Path("movie_id") String movieId,
             @Query("api_key") String apiKey
     );
+
+    // Lệnh tải phim theo bộ lọc (Không có lệnh này app sẽ văng)
+    @GET("discover/movie")
+    Call<MovieResponse> getMoviesByFilter(
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
+            @Query("with_genres") String genreId,
+            @Query("with_origin_country") String countryCode,
+            @Query("primary_release_year") String year,
+            @Query("page") int page
+    );
 }

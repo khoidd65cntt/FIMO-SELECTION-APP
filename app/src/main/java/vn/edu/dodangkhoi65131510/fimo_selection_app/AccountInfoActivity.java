@@ -72,4 +72,10 @@ public class AccountInfoActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ThemeHelper.applyTheme(this);
+    }
 }

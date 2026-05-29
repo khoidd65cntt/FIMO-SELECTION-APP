@@ -2,7 +2,9 @@ package vn.edu.dodangkhoi65131510.fimo_selection_app;
 
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -74,7 +76,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     private int mOriginalSystemUiVisibility;
     private WebChromeClient webChromeClient;
 
-    // Khai báo đường link DB Singapore
     private static final String DB_URL = "https://fimo-selection-app-default-rtdb.asia-southeast1.firebasedatabase.app";
 
     @Override
@@ -93,8 +94,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         TextView tvDesc = findViewById(R.id.tvDetailDesc);
         ImageView btnBack = findViewById(R.id.btnBackDetail);
         Button btnTrailer = findViewById(R.id.btnTrailer);
-
-        // Đã cập nhật: Ánh xạ btnFavorite dưới dạng Button
         Button btnFavorite = findViewById(R.id.btnFavorite);
 
         rvCast = findViewById(R.id.rvCast);
@@ -148,21 +147,17 @@ public class MovieDetailActivity extends AppCompatActivity {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
 
-        // Xử lý logic nút Yêu thích
         if (user != null && movieId != null && btnFavorite != null) {
             DatabaseReference favRef = FirebaseDatabase.getInstance(DB_URL)
                     .getReference("Users").child(user.getUid()).child("Favorites").child(movieId);
 
-            // Kiểm tra trạng thái hiện tại trên Firebase để cập nhật UI
             favRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
-                        // Nếu đã yêu thích: Đổi chữ và màu
                         btnFavorite.setText("Đã yêu thích");
-                        btnFavorite.setTextColor(Color.parseColor("#E50914")); // Màu đỏ
+                        btnFavorite.setTextColor(Color.parseColor("#E50914"));
                     } else {
-                        // Nếu chưa yêu thích
                         btnFavorite.setText("Yêu thích");
                         btnFavorite.setTextColor(Color.WHITE);
                     }
@@ -171,16 +166,13 @@ public class MovieDetailActivity extends AppCompatActivity {
                 public void onCancelled(@NonNull DatabaseError error) {}
             });
 
-            // Sự kiện Click
             btnFavorite.setOnClickListener(v -> {
                 favRef.get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         if (task.getResult().exists()) {
-                            // Xóa khỏi danh sách yêu thích
                             favRef.removeValue();
                             Toast.makeText(MovieDetailActivity.this, "Đã bỏ yêu thích", Toast.LENGTH_SHORT).show();
                         } else {
-                            // Thêm vào danh sách yêu thích
                             HashMap<String, String> favData = new HashMap<>();
                             favData.put("id", movieId);
                             favData.put("title", title);
@@ -295,7 +287,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
                         Toast.makeText(MovieDetailActivity.this, "Đang tải nguồn phim...", Toast.LENGTH_SHORT).show();
 
-                        // Ép link DB cho phần lưu Lịch sử khi nhấn Play
                         if (user != null) {
                             DatabaseReference historyRef = FirebaseDatabase.getInstance(DB_URL)
                                     .getReference("Users")
@@ -333,6 +324,12 @@ public class MovieDetailActivity extends AppCompatActivity {
 
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ThemeHelper.applyTheme(this);
     }
 
     private void initializePlayer(String videoUrl) {
@@ -537,6 +534,12 @@ public class MovieDetailActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull CastViewHolder holder, int position) {
             CastMember member = list.get(position);
             holder.tvName.setText(member.getName());
+
+            // Giải cứu chữ trắng trên nền trắng của diễn viên
+            SharedPreferences prefs = holder.itemView.getContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
+            boolean isNightMode = prefs.getBoolean("isNightMode", true);
+            int textColor = isNightMode ? Color.parseColor("#FFFFFF") : Color.parseColor("#000000");
+            ThemeHelper.changeColorsSafe(holder.itemView, textColor, isNightMode);
 
             String imageUrl = "https://image.tmdb.org/t/p/w185" + member.getProfilePath();
             if (member.getProfilePath() != null && !member.getProfilePath().isEmpty()) {

@@ -1,5 +1,9 @@
 package vn.edu.dodangkhoi65131510.fimo_selection_app;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -8,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,7 +46,7 @@ public class SearchFragment extends Fragment {
         rvSearchResults = view.findViewById(R.id.rvSearchResults);
 
         searchResultList = new ArrayList<>();
-        searchAdapter = new MovieAdapter(requireContext(), searchResultList);
+        searchAdapter = new MovieAdapter(requireContext(), searchResultList, "movie");
 
         rvSearchResults.setLayoutManager(new GridLayoutManager(requireContext(), 3));
         rvSearchResults.setAdapter(searchAdapter);
@@ -60,6 +65,51 @@ public class SearchFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        applyTheme();
+    }
+
+    private void applyTheme() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
+        boolean isNightMode = prefs.getBoolean("isNightMode", true);
+
+        View root = getView();
+        if (root != null) {
+            root.setBackgroundColor(isNightMode ? Color.parseColor("#141414") : Color.parseColor("#F5F5F5"));
+            int textColor = isNightMode ? Color.parseColor("#FFFFFF") : Color.parseColor("#000000");
+            int boxColor = isNightMode ? Color.parseColor("#252525") : Color.parseColor("#E0E0E0");
+
+            updateSearchTheme((ViewGroup) root, textColor, boxColor);
+        }
+    }
+
+    private void updateSearchTheme(ViewGroup parent, int textColor, int boxColor) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+
+            if (child.getId() == R.id.rvSearchResults) {
+                continue;
+            }
+
+            if (child instanceof ViewGroup) {
+                if (child.getBackground() != null) {
+                    child.setBackgroundTintList(ColorStateList.valueOf(boxColor));
+                }
+                updateSearchTheme((ViewGroup) child, textColor, boxColor);
+            } else if (child instanceof EditText) {
+                ((EditText) child).setTextColor(textColor);
+                ((EditText) child).setHintTextColor(textColor == Color.parseColor("#000000") ? Color.parseColor("#666666") : Color.parseColor("#888888"));
+                if (child.getBackground() != null) {
+                    child.setBackgroundTintList(ColorStateList.valueOf(boxColor));
+                }
+            } else if (child instanceof TextView) {
+                ((TextView) child).setTextColor(textColor);
+            }
+        }
     }
 
     private void searchMoviesFromApi(String query) {

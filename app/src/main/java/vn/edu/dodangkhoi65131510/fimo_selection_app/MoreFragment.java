@@ -3,6 +3,7 @@ package vn.edu.dodangkhoi65131510.fimo_selection_app;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -35,7 +37,7 @@ public class MoreFragment extends Fragment {
     private ImageView imgAvatar;
     private TextView tvProfileName, tvProfileEmail;
     private LinearLayout layoutProfileHeader;
-    private TextView btnAccountInfo, btnLibrary, btnGift, btnFavorites, btnContact, btnSettings, btnLogout;
+    private TextView btnAccountInfo, btnLibrary, btnGift, btnFavorites, btnLogout;
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
 
@@ -72,8 +74,6 @@ public class MoreFragment extends Fragment {
         btnLibrary = view.findViewById(R.id.btnLibrary);
         btnGift = view.findViewById(R.id.btnGift);
         btnFavorites = view.findViewById(R.id.btnFavorites);
-        btnContact = view.findViewById(R.id.btnContact);
-        btnSettings = view.findViewById(R.id.btnSettings);
         btnLogout = view.findViewById(R.id.btnLogout);
 
         mAuth = FirebaseAuth.getInstance();
@@ -113,9 +113,6 @@ public class MoreFragment extends Fragment {
             }
         });
 
-        btnContact.setOnClickListener(v -> Toast.makeText(requireContext(), "Thông tin liên hệ", Toast.LENGTH_SHORT).show());
-        btnSettings.setOnClickListener(v -> Toast.makeText(requireContext(), "Cài đặt ứng dụng", Toast.LENGTH_SHORT).show());
-
         btnLogout.setOnClickListener(v -> {
             if (mAuth.getCurrentUser() != null) {
                 mAuth.signOut();
@@ -134,6 +131,44 @@ public class MoreFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateUserProfile();
+        applyTheme();
+    }
+
+    private void applyTheme() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
+        boolean isNightMode = prefs.getBoolean("isNightMode", true);
+
+        View root = getView();
+        if (root != null) {
+            root.setBackgroundColor(isNightMode ? Color.parseColor("#141414") : Color.parseColor("#F5F5F5"));
+            int textColor = isNightMode ? Color.parseColor("#FFFFFF") : Color.parseColor("#000000");
+            int boxColor = isNightMode ? Color.parseColor("#252525") : Color.parseColor("#E0E0E0");
+
+            updateMoreTheme((ViewGroup) root, textColor, boxColor);
+        }
+    }
+
+    private void updateMoreTheme(ViewGroup parent, int textColor, int boxColor) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            View child = parent.getChildAt(i);
+
+            if (child.getId() == R.id.imgAvatar) continue;
+
+            if (child instanceof ViewGroup) {
+                if (child.getBackground() != null && !(child instanceof RecyclerView)) {
+                    child.setBackgroundTintList(ColorStateList.valueOf(boxColor));
+                }
+                updateMoreTheme((ViewGroup) child, textColor, boxColor);
+            } else if (child instanceof TextView) {
+                TextView tv = (TextView) child;
+                if (tv.getCurrentTextColor() != Color.parseColor("#E50914") && tv.getCurrentTextColor() != Color.parseColor("#FF5722")) {
+                    tv.setTextColor(textColor);
+                }
+                if (tv.getBackground() != null) {
+                    tv.setBackgroundTintList(ColorStateList.valueOf(boxColor));
+                }
+            }
+        }
     }
 
     private void updateUserProfile() {
@@ -144,7 +179,6 @@ public class MoreFragment extends Fragment {
         if (currentUser != null) {
             String displayName = currentUser.getDisplayName();
             tvProfileName.setText(displayName != null && !displayName.isEmpty() ? displayName : "Người dùng FIMO");
-            tvProfileName.setTextColor(Color.parseColor("#FFFFFF"));
 
             tvProfileEmail.setText(currentUser.getEmail());
             tvProfileEmail.setVisibility(View.VISIBLE);
@@ -180,7 +214,6 @@ public class MoreFragment extends Fragment {
             inputStream.close();
             return file.getAbsolutePath();
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }

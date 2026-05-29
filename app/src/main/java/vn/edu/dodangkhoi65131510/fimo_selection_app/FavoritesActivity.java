@@ -1,6 +1,7 @@
 package vn.edu.dodangkhoi65131510.fimo_selection_app;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -31,6 +32,7 @@ public class FavoritesActivity extends AppCompatActivity {
     private FavoriteAdapter adapter;
     private List<FavoriteItem> list;
     private FirebaseAuth mAuth;
+    private static final String DB_URL = "https://fimo-selection-app-default-rtdb.asia-southeast1.firebasedatabase.app";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,25 +46,37 @@ public class FavoritesActivity extends AppCompatActivity {
 
         list = new ArrayList<>();
         adapter = new FavoriteAdapter(list);
-        rvFavorites.setLayoutManager(new GridLayoutManager(this, 3));
+        rvFavorites.setLayoutManager(new LinearLayoutManager(this));
         rvFavorites.setAdapter(adapter);
 
         mAuth = FirebaseAuth.getInstance();
         loadFavorites();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ThemeHelper.applyTheme(this);
+    }
+
     private void loadFavorites() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid()).child("Favorites");
+        DatabaseReference ref = FirebaseDatabase.getInstance(DB_URL).getReference("Users").child(user.getUid()).child("Favorites");
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 list.clear();
                 for (DataSnapshot data : snapshot.getChildren()) {
-                    FavoriteItem item = data.getValue(FavoriteItem.class);
-                    if (item != null) {
+                    FavoriteItem item = new FavoriteItem();
+                    item.id = data.child("id").getValue(String.class);
+                    item.title = data.child("title").getValue(String.class);
+                    item.desc = data.child("desc").getValue(String.class);
+                    item.poster = data.child("poster").getValue(String.class);
+                    item.mediaType = data.child("mediaType").getValue(String.class);
+
+                    if (item.id != null) {
                         list.add(item);
                     }
                 }
@@ -102,15 +116,31 @@ public class FavoritesActivity extends AppCompatActivity {
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_movie, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_history_row, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             FavoriteItem item = items.get(position);
-            if (holder.imgPoster != null) Glide.with(holder.itemView.getContext()).load(item.poster).centerCrop().into(holder.imgPoster);
-            if (holder.tvTitle != null) holder.tvTitle.setText(item.title);
+            if (holder.imgPoster != null && item.poster != null && !item.poster.isEmpty()) {
+                Glide.with(holder.itemView.getContext()).load(item.poster).centerCrop().into(holder.imgPoster);
+            }
+            if (holder.tvTitle != null) {
+                holder.tvTitle.setText(item.title != null ? item.title : "");
+            }
+            if (holder.tvDesc != null) {
+                holder.tvDesc.setText(item.desc != null ? item.desc : "");
+            }
+            if (holder.tvType != null) {
+                if (item.mediaType != null && item.mediaType.equalsIgnoreCase("tv")) {
+                    holder.tvType.setText("PHIM BỘ");
+                    holder.tvType.setBackgroundColor(Color.parseColor("#E50914"));
+                } else {
+                    holder.tvType.setText("PHIM LẺ");
+                    holder.tvType.setBackgroundColor(Color.parseColor("#1E88E5"));
+                }
+            }
 
             holder.itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(holder.itemView.getContext(), MovieDetailActivity.class);
@@ -131,11 +161,15 @@ public class FavoritesActivity extends AppCompatActivity {
         class ViewHolder extends RecyclerView.ViewHolder {
             ImageView imgPoster;
             TextView tvTitle;
+            TextView tvDesc;
+            TextView tvType;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                imgPoster = itemView.findViewById(R.id.imgMoviePoster);
-                tvTitle = itemView.findViewById(R.id.tvMovieTitle);
+                imgPoster = itemView.findViewById(R.id.imgHistoryPoster);
+                tvTitle = itemView.findViewById(R.id.tvHistoryTitle);
+                tvDesc = itemView.findViewById(R.id.tvHistoryDesc);
+                tvType = itemView.findViewById(R.id.tvHistoryType);
             }
         }
     }
