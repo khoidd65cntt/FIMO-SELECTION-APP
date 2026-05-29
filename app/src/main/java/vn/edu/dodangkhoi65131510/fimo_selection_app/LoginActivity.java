@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,10 +23,13 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        ImageView btnBack = findViewById(R.id.btnBack);
         EditText edtEmail = findViewById(R.id.edtEmail);
         EditText edtPassword = findViewById(R.id.edtPassword);
         Button btnLogin = findViewById(R.id.btnLogin);
         TextView tvSignUp = findViewById(R.id.tvSignUp);
+
+        btnBack.setOnClickListener(v -> finish());
 
         btnLogin.setOnClickListener(v -> {
             String email = edtEmail.getText().toString().trim();
@@ -53,5 +57,11 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ThemeHelper.applyTheme(this);
     }
 }

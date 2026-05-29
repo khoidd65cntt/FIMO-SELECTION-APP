@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -15,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -62,6 +65,18 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
         boolean isNightMode = prefs.getBoolean("isNightMode", true);
         applyTheme(isNightMode, false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Kiểm tra xem người dùng đã đăng nhập chưa
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            icLogin.setVisibility(View.GONE); // Đã đăng nhập -> Ẩn logo
+        } else {
+            icLogin.setVisibility(View.VISIBLE); // Chưa đăng nhập -> Hiện logo
+        }
     }
 
     public void applyTheme(boolean isNightMode, boolean animate) {

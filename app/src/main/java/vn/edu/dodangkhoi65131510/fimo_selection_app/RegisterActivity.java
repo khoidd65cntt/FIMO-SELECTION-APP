@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        ImageView btnBack = findViewById(R.id.btnBack);
         EditText edtRegName = findViewById(R.id.edtRegName);
         EditText edtRegEmail = findViewById(R.id.edtRegEmail);
         EditText edtRegPassword = findViewById(R.id.edtRegPassword);
@@ -32,6 +34,8 @@ public class RegisterActivity extends AppCompatActivity {
         CheckBox cbAgree = findViewById(R.id.cbAgree);
         Button btnRegister = findViewById(R.id.btnRegister);
         TextView tvLogin = findViewById(R.id.tvLogin);
+
+        btnBack.setOnClickListener(v -> finish());
 
         btnRegister.setOnClickListener(v -> {
             String name = edtRegName.getText().toString().trim();
@@ -82,5 +86,11 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
         tvLogin.setOnClickListener(v -> finish());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ThemeHelper.applyTheme(this);
     }
 }
