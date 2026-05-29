@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -99,33 +98,6 @@ public class HomeFragment extends Fragment {
         view.findViewById(R.id.tvFilterCountry).setOnClickListener(v -> showDialog(R.layout.layout_dialog_country, 0, "Quốc gia"));
         view.findViewById(R.id.tvFilterYear).setOnClickListener(v -> showDialog(R.layout.layout_dialog_year, 1, "Năm"));
 
-        androidx.core.widget.NestedScrollView nestedScrollView = view.findViewById(R.id.nestedScrollView);
-        TextView btnScrollTop = view.findViewById(R.id.btnScrollTop);
-        ImageView btnThemeToggle = view.findViewById(R.id.btnThemeToggle);
-
-        if (nestedScrollView != null && btnScrollTop != null) {
-            nestedScrollView.setOnScrollChangeListener((androidx.core.widget.NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-                if (scrollY > 400) btnScrollTop.setVisibility(View.VISIBLE);
-                else btnScrollTop.setVisibility(View.GONE);
-            });
-            btnScrollTop.setOnClickListener(v -> nestedScrollView.smoothScrollTo(0, 0));
-        }
-
-        if (btnThemeToggle != null) {
-            btnThemeToggle.setOnClickListener(v -> {
-                SharedPreferences prefs = requireContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
-                boolean fromNight = prefs.getBoolean("isNightMode", true);
-                boolean newNight = !fromNight;
-                prefs.edit().putBoolean("isNightMode", newNight).apply();
-
-                applyHomeTheme(newNight);
-
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).applyTheme(newNight, true);
-                }
-            });
-        }
-
         RecyclerView rvBanners = view.findViewById(R.id.rvBanners);
         RecyclerView rvTop10 = view.findViewById(R.id.rvTop10);
         RecyclerView rvNewRecommended = view.findViewById(R.id.rvNewRecommended);
@@ -171,79 +143,14 @@ public class HomeFragment extends Fragment {
         if (sliderAdapter != null && sliderAdapter.getItemCount() > 0) {
             sliderHandler.postDelayed(sliderRunnable, 5000);
         }
-        SharedPreferences prefs = requireContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
-        applyHomeTheme(prefs.getBoolean("isNightMode", true));
-    }
-
-    private void applyHomeTheme(boolean isNightMode) {
-        View view = getView();
-        if (view == null) return;
-
-        androidx.core.widget.NestedScrollView nestedScrollView = view.findViewById(R.id.nestedScrollView);
-        if (nestedScrollView != null) {
-            nestedScrollView.setBackgroundColor(isNightMode ? Color.parseColor("#141414") : Color.parseColor("#F5F5F5"));
-        }
-
-        int textColor = isNightMode ? Color.parseColor("#FFFFFF") : Color.parseColor("#000000");
-
-        TextView[] textViewsToAnimate = {
-                view.findViewById(R.id.tvTitleHot), view.findViewById(R.id.tvTitleTop10),
-                view.findViewById(R.id.tvTitleNewRec), view.findViewById(R.id.tvTitleNewTv),
-                view.findViewById(R.id.tvTitleNewTheaters), view.findViewById(R.id.tvTitleNewMovies),
-                view.findViewById(R.id.tvFilterCountry), view.findViewById(R.id.tvFilterYear)
-        };
-
-        for (TextView tv : textViewsToAnimate) {
-            if (tv != null) tv.setTextColor(textColor);
-        }
-
-        int[] rvIds = {R.id.rvBanners, R.id.rvTop10, R.id.rvNewRecommended, R.id.rvNewTvShows, R.id.rvNewTheaters, R.id.rvNewMovies};
-        for (int id : rvIds) {
-            RecyclerView rv = view.findViewById(id);
-            if (rv != null) {
-                for (int i = 0; i < rv.getChildCount(); i++) {
-                    updateItemTextColor(rv.getChildAt(i), textColor);
-                }
-            }
-        }
-
-        ImageView btnThemeToggle = view.findViewById(R.id.btnThemeToggle);
-        if (btnThemeToggle != null) {
-            btnThemeToggle.setImageResource(isNightMode ? R.drawable.ic_sun : R.drawable.ic_moon);
-        }
-    }
-
-    private void updateItemTextColor(View view, int color) {
-        if (view instanceof ViewGroup) {
-            ViewGroup vg = (ViewGroup) view;
-            for (int i = 0; i < vg.getChildCount(); i++) {
-                updateItemTextColor(vg.getChildAt(i), color);
-            }
-        } else if (view instanceof TextView) {
-            TextView tv = (TextView) view;
-            int current = tv.getCurrentTextColor();
-            if (current != Color.parseColor("#E50914") && current != Color.parseColor("#FF9800") && current != Color.parseColor("#FF5722")) {
-                tv.setTextColor(color);
-            }
+        if (getActivity() != null) {
+            ThemeHelper.applyTheme(getActivity());
         }
     }
 
     private void setupRecyclerView(RecyclerView rv, MovieAdapter adapter) {
         rv.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         rv.setAdapter(adapter);
-
-        rv.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
-            @Override
-            public void onChildViewAttachedToWindow(@NonNull View view) {
-                SharedPreferences prefs = requireContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
-                boolean isNightMode = prefs.getBoolean("isNightMode", true);
-                int textColor = isNightMode ? Color.parseColor("#FFFFFF") : Color.parseColor("#000000");
-                updateItemTextColor(view, textColor);
-            }
-
-            @Override
-            public void onChildViewDetachedFromWindow(@NonNull View view) {}
-        });
     }
 
     private void fetchNowPlayingForSlider() {
@@ -379,7 +286,7 @@ public class HomeFragment extends Fragment {
         int dialogBgColor = isNightMode ? Color.parseColor("#252525") : Color.parseColor("#FFFFFF");
 
         dialogView.setBackgroundColor(dialogBgColor);
-        updateItemTextColor(dialogView, dialogTextColor);
+        ThemeHelper.changeColorsSafe(dialogView, dialogTextColor, isNightMode);
 
         builder.setView(dialogView);
         AlertDialog dialog = builder.create();

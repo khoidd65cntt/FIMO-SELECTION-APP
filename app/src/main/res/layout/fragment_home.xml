@@ -168,37 +168,4 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <ImageView
-            android:id="@+id/btnThemeToggle"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="12dp"
-            android:background="@drawable/circle_background"
-            android:backgroundTint="#252525"
-            android:padding="12dp"
-            android:src="@drawable/ic_sun"
-            app:tint="#E0E0E0" />
-
-        <TextView
-            android:id="@+id/btnScrollTop"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/circle_background"
-            android:backgroundTint="#E50914"
-            android:gravity="center"
-            android:text="▲"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
-    </LinearLayout>
-
 </FrameLayout>
