@@ -11,6 +11,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -100,7 +101,7 @@ public class ThemeHelper {
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.gravity = Gravity.BOTTOM | Gravity.END;
 
-            int bottomMargin = activity.getClass().getSimpleName().equals("MainActivity") ? (int) (70 * density) : margin16;
+            int bottomMargin = activity.getClass().getSimpleName().equals("MainActivity") ? (int) (90 * density) : margin16;
             params.setMargins(0, 0, margin16, bottomMargin);
             floatLayout.setLayoutParams(params);
 
@@ -192,15 +193,13 @@ public class ThemeHelper {
         return null;
     }
 
-    // Màng chắn bảo vệ: Dò tìm xem View này có nằm trong Slider hay Banner không
     private static boolean isProtectedFromTheme(View view) {
         View current = view;
         while (current != null) {
             if (current.getId() != View.NO_ID) {
                 try {
                     String name = current.getResources().getResourceEntryName(current.getId()).toLowerCase();
-                    // Nếu nó nằm trong các khu vực ảnh này, lập tức giương khiên bảo vệ
-                    if (name.contains("slider") || name.contains("banner") || name.contains("player")) {
+                    if (name.contains("slider") || name.contains("banner") || name.contains("player") || name.contains("logo")) {
                         return true;
                     }
                 } catch (Exception ignored) {}
@@ -261,15 +260,14 @@ public class ThemeHelper {
                 changeColorsSafe(vg.getChildAt(i), textColor, isNightMode);
             }
         } else if (view instanceof TextView) {
-            if (!(view instanceof Button)) {
+            if (!(view instanceof Button) || view instanceof CheckBox) {
                 TextView tv = (TextView) view;
                 int currentColor = tv.getCurrentTextColor();
 
                 if (isProtected) {
-                    // Cứu các chữ trong Slider: ÉP cứng màu trắng để nổi trên nền ảnh
                     tv.setTextColor(Color.WHITE);
                 } else if (currentColor != Color.parseColor("#E50914") && currentColor != Color.parseColor("#FF5722") && currentColor != Color.RED) {
-                    if (currentColor == Color.parseColor("#888888") || currentColor == Color.parseColor("#666666") || currentColor == Color.parseColor("#555555") || currentColor == Color.parseColor("#777777") || currentColor == Color.parseColor("#999999") || currentColor == Color.parseColor("#CCCCCC")) {
+                    if (currentColor == Color.parseColor("#888888") || currentColor == Color.parseColor("#666666") || currentColor == Color.parseColor("#555555") || currentColor == Color.parseColor("#777777") || currentColor == Color.parseColor("#999999") || currentColor == Color.parseColor("#CCCCCC") || currentColor == Color.parseColor("#AAAAAA")) {
                         tv.setTextColor(isNightMode ? Color.parseColor("#888888") : Color.parseColor("#555555"));
                     } else {
                         tv.setTextColor(textColor);
@@ -282,10 +280,22 @@ public class ThemeHelper {
                     }
                 }
             }
+
             if (view instanceof EditText) {
-                int boxColor = isNightMode ? Color.parseColor("#252525") : Color.parseColor("#E0E0E0");
-                view.setBackgroundTintList(ColorStateList.valueOf(boxColor));
-                ((EditText) view).setHintTextColor(isNightMode ? Color.parseColor("#888888") : Color.parseColor("#666666"));
+                EditText edt = (EditText) view;
+                edt.setHintTextColor(isNightMode ? Color.parseColor("#888888") : Color.parseColor("#666666"));
+
+                Drawable bg = edt.getBackground();
+                if (bg != null) {
+                    boolean isTransparent = false;
+                    if (bg instanceof ColorDrawable) {
+                        isTransparent = ((ColorDrawable) bg).getColor() == Color.TRANSPARENT;
+                    }
+                    if (!isTransparent) {
+                        int boxColor = isNightMode ? Color.parseColor("#252525") : Color.parseColor("#E8E8E8");
+                        edt.setBackgroundTintList(ColorStateList.valueOf(boxColor));
+                    }
+                }
             }
         } else if (view instanceof ImageView) {
             ImageView iv = (ImageView) view;
@@ -298,9 +308,12 @@ public class ThemeHelper {
             if (iv.getId() != View.NO_ID) {
                 try {
                     String resName = iv.getResources().getResourceEntryName(iv.getId()).toLowerCase();
-                    if (resName.contains("avatar") || resName.contains("poster") || resName.contains("banner") || resName.contains("slider") || resName.contains("imgcast")) {
+                    if (resName.contains("logo")) {
+                        iv.setColorFilter(Color.parseColor("#0984E3"));
                         shouldTint = false;
-                    } else if (resName.contains("back") || resName.contains("bg") || resName.contains("background") || resName.contains("logo") || resName.contains("watermark")) {
+                    } else if (resName.contains("avatar") || resName.contains("poster") || resName.contains("banner") || resName.contains("slider") || resName.contains("imgcast")) {
+                        shouldTint = false;
+                    } else if (resName.contains("back") || resName.contains("bg") || resName.contains("background") || resName.contains("watermark")) {
                         shouldTint = true;
                     }
                 } catch (Exception ignored) {}
@@ -315,7 +328,6 @@ public class ThemeHelper {
             }
         }
 
-        // Cứu tag "THỊNH HÀNH": Vì bị isProtected chặn nên isBox = false, nền Đỏ sẽ không bị quét thành Xám/Đen
         if (isBox && !isProtected) {
             ColorStateList bgTint = view.getBackgroundTintList();
             boolean isRedBg = bgTint != null && (bgTint.getDefaultColor() == Color.parseColor("#E50914") || bgTint.getDefaultColor() == Color.parseColor("#FF5722"));

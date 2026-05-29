@@ -2,6 +2,7 @@ package vn.edu.dodangkhoi65131510.fimo_selection_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,11 @@ public class LoginActivity extends AppCompatActivity {
         EditText edtPassword = findViewById(R.id.edtPassword);
         Button btnLogin = findViewById(R.id.btnLogin);
         TextView tvSignUp = findViewById(R.id.tvSignUp);
+        ImageView imgTogglePassword = findViewById(R.id.imgTogglePassword);
+
+        imgTogglePassword.setAlpha(0.5f);
+
+        imgTogglePassword.setOnClickListener(v -> togglePasswordVisibility(edtPassword, imgTogglePassword));
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -57,6 +64,18 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void togglePasswordVisibility(EditText editText, ImageView icon) {
+        isPasswordVisible = !isPasswordVisible;
+        if (isPasswordVisible) {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            icon.setAlpha(1.0f);
+        } else {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            icon.setAlpha(0.5f);
+        }
+        editText.setSelection(editText.getText().length());
     }
 
     @Override

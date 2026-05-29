@@ -2,6 +2,7 @@ package vn.edu.dodangkhoi65131510.fimo_selection_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -18,6 +19,8 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private boolean isPasswordVisible = false;
+    private boolean isConfirmPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,21 @@ public class RegisterActivity extends AppCompatActivity {
         CheckBox cbAgree = findViewById(R.id.cbAgree);
         Button btnRegister = findViewById(R.id.btnRegister);
         TextView tvLogin = findViewById(R.id.tvLogin);
+        ImageView imgToggleRegPassword = findViewById(R.id.imgToggleRegPassword);
+        ImageView imgToggleRegConfirmPassword = findViewById(R.id.imgToggleRegConfirmPassword);
+
+        imgToggleRegPassword.setAlpha(0.5f);
+        imgToggleRegConfirmPassword.setAlpha(0.5f);
+
+        imgToggleRegPassword.setOnClickListener(v -> {
+            isPasswordVisible = !isPasswordVisible;
+            toggleVisibility(edtRegPassword, imgToggleRegPassword, isPasswordVisible);
+        });
+
+        imgToggleRegConfirmPassword.setOnClickListener(v -> {
+            isConfirmPasswordVisible = !isConfirmPasswordVisible;
+            toggleVisibility(edtRegConfirmPassword, imgToggleRegConfirmPassword, isConfirmPasswordVisible);
+        });
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -86,6 +104,17 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
         tvLogin.setOnClickListener(v -> finish());
+    }
+
+    private void toggleVisibility(EditText editText, ImageView icon, boolean isVisible) {
+        if (isVisible) {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            icon.setAlpha(1.0f);
+        } else {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            icon.setAlpha(0.5f);
+        }
+        editText.setSelection(editText.getText().length());
     }
 
     @Override

@@ -36,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.20" />
+        app:layout_constraintGuide_percent="0.10" />
 
     <TextView
         android:id="@+id/tvRegTitle"
@@ -51,36 +51,49 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guidelineReg" />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imgRegLogoFimo"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:layout_marginTop="12dp"
+        android:src="@drawable/screenshot_2026_05_23_150929"
+        app:tint="#0984E3"
+        android:tint="#0984E3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvRegTitle" />
+
     <EditText
         android:id="@+id/edtRegName"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/bg_input_field"
+        android:background="@drawable/bg_pill_input"
         android:hint="Tên hiển thị"
         android:inputType="textPersonName"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
         android:textColor="#FFFFFF"
         android:textColorHint="#888888"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvRegTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/imgRegLogoFimo" />
 
     <EditText
         android:id="@+id/edtRegEmail"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/bg_input_field"
+        android:background="@drawable/bg_pill_input"
         android:hint="Nhập Email"
         android:inputType="textEmailAddress"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
         android:textColor="#FFFFFF"
         android:textColorHint="#888888"
         app:layout_constraintEnd_toEndOf="parent"
@@ -92,42 +105,64 @@
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/bg_input_field"
+        android:background="@drawable/bg_pill_input"
         android:hint="Nhập Mật khẩu"
         android:inputType="textPassword"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="55dp"
         android:textColor="#FFFFFF"
         android:textColorHint="#888888"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edtRegEmail" />
 
+    <ImageView
+        android:id="@+id/imgToggleRegPassword"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="8dp"
+        android:padding="12dp"
+        android:src="@drawable/ic_eye"
+        app:layout_constraintBottom_toBottomOf="@+id/edtRegPassword"
+        app:layout_constraintEnd_toEndOf="@+id/edtRegPassword"
+        app:layout_constraintTop_toTopOf="@+id/edtRegPassword" />
+
     <EditText
         android:id="@+id/edtRegConfirmPassword"
         android:layout_width="0dp"
         android:layout_height="55dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="32dp"
-        android:background="@drawable/bg_input_field"
+        android:background="@drawable/bg_pill_input"
         android:hint="Xác nhận Mật khẩu"
         android:inputType="textPassword"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="55dp"
         android:textColor="#FFFFFF"
         android:textColorHint="#888888"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edtRegPassword" />
 
+    <ImageView
+        android:id="@+id/imgToggleRegConfirmPassword"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="8dp"
+        android:padding="12dp"
+        android:src="@drawable/ic_eye"
+        app:layout_constraintBottom_toBottomOf="@+id/edtRegConfirmPassword"
+        app:layout_constraintEnd_toEndOf="@+id/edtRegConfirmPassword"
+        app:layout_constraintTop_toTopOf="@+id/edtRegConfirmPassword" />
+
     <LinearLayout
         android:id="@+id/layoutAgreement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -151,14 +186,14 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnRegister"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
-        android:backgroundTint="#FF5722"
+        android:background="@drawable/bg_pill_button"
         android:text="ĐĂNG KÝ"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
@@ -171,7 +206,7 @@
         android:id="@+id/tvLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:text="Đã có tài khoản? Đăng nhập"
         android:textColor="#FF5722"
         android:textSize="15sp"
