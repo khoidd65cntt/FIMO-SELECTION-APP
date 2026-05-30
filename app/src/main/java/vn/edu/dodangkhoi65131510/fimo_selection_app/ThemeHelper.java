@@ -219,7 +219,7 @@ public class ThemeHelper {
         if ("FIMO_FLOAT_CONTAINER".equals(view.getTag()) || "FIMO_BTN_THEME".equals(view.getTag()) || "FIMO_BTN_SCROLL".equals(view.getTag())) {
             return;
         }
-        
+
         if (view.getClass().getName().contains("BottomNavigation")) {
             try {
                 com.google.android.material.bottomnavigation.BottomNavigationView bnv =
