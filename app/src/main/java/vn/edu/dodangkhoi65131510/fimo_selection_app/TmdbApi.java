@@ -51,7 +51,6 @@ public interface TmdbApi {
             @Query("api_key") String apiKey
     );
 
-    // Lệnh tải phim theo bộ lọc (Không có lệnh này app sẽ văng)
     @GET("discover/movie")
     Call<MovieResponse> getMoviesByFilter(
             @Query("api_key") String apiKey,
@@ -59,6 +58,49 @@ public interface TmdbApi {
             @Query("with_genres") String genreId,
             @Query("with_origin_country") String countryCode,
             @Query("primary_release_year") String year,
+            @Query("page") int page
+    );
+
+    @GET("movie/{movie_id}/recommendations")
+    Call<MovieDetailActivity.RecommendResponse> getMovieRecommendations(
+            @Path("movie_id") String movieId,
+            @Query("api_key") String apiKey,
+            @Query("language") String language
+    );
+
+    @GET("tv/{tv_id}/recommendations")
+    Call<MovieDetailActivity.RecommendResponse> getTvRecommendations(
+            @Path("tv_id") String tvId,
+            @Query("api_key") String apiKey,
+            @Query("language") String language
+    );
+
+    @GET("movie/{movie_id}/similar")
+    Call<MovieDetailActivity.RecommendResponse> getSimilarMovies(
+            @Path("movie_id") String movieId,
+            @Query("api_key") String apiKey,
+            @Query("language") String language
+    );
+
+    @GET("tv/{tv_id}/similar")
+    Call<MovieDetailActivity.RecommendResponse> getTvSimilar(
+            @Path("tv_id") String tvId,
+            @Query("api_key") String apiKey,
+            @Query("language") String language
+    );
+
+    // LỆNH MỚI: LẤY PHIM ĐANG CHIẾU / THỊNH HÀNH ĐỂ APP LÚC NÀO CŨNG GỢI Ý PHIM MỚI
+    @GET("movie/now_playing")
+    Call<MovieDetailActivity.RecommendResponse> getFreshMovies(
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
+            @Query("page") int page
+    );
+
+    @GET("tv/on_the_air")
+    Call<MovieDetailActivity.RecommendResponse> getFreshTvShows(
+            @Query("api_key") String apiKey,
+            @Query("language") String language,
             @Query("page") int page
     );
 }

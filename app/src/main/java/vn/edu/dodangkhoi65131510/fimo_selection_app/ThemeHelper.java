@@ -199,7 +199,7 @@ public class ThemeHelper {
             if (current.getId() != View.NO_ID) {
                 try {
                     String name = current.getResources().getResourceEntryName(current.getId()).toLowerCase();
-                    if (name.contains("slider") || name.contains("banner") || name.contains("player") || name.contains("logo")) {
+                    if (name.contains("slider") || name.contains("banner") || name.contains("player") || name.contains("logo") || name.contains("logout")) {
                         return true;
                     }
                 } catch (Exception ignored) {}
@@ -217,6 +217,25 @@ public class ThemeHelper {
         if (view == null) return;
 
         if ("FIMO_FLOAT_CONTAINER".equals(view.getTag()) || "FIMO_BTN_THEME".equals(view.getTag()) || "FIMO_BTN_SCROLL".equals(view.getTag())) {
+            return;
+        }
+        
+        if (view.getClass().getName().contains("BottomNavigation")) {
+            try {
+                com.google.android.material.bottomnavigation.BottomNavigationView bnv =
+                        (com.google.android.material.bottomnavigation.BottomNavigationView) view;
+                int[][] states = new int[][] {
+                        new int[] { android.R.attr.state_checked }, // Khi được chọn
+                        new int[] { -android.R.attr.state_checked } // Khi không được chọn
+                };
+                int[] colors = new int[] {
+                        Color.parseColor("#FF5722"), // MÀU CAM (Bắt buộc)
+                        Color.parseColor("#888888")  // Màu Xám (Bắt buộc)
+                };
+                ColorStateList csl = new ColorStateList(states, colors);
+                bnv.setItemIconTintList(csl);
+                bnv.setItemTextColor(csl);
+            } catch (Exception e) {}
             return;
         }
 
@@ -241,7 +260,7 @@ public class ThemeHelper {
 
         if (view instanceof ViewGroup) {
             String viewName = view.getClass().getName();
-            if (!viewName.contains("BottomNavigation") && !viewName.contains("RecyclerView") && !viewName.contains("ViewPager2") && !viewName.contains("ScrollView")) {
+            if (!viewName.contains("RecyclerView") && !viewName.contains("ViewPager2") && !viewName.contains("ScrollView")) {
                 Drawable bg = view.getBackground();
                 if (bg instanceof ColorDrawable) {
                     int color = ((ColorDrawable) bg).getColor();
@@ -265,7 +284,16 @@ public class ThemeHelper {
                 int currentColor = tv.getCurrentTextColor();
 
                 if (isProtected) {
-                    tv.setTextColor(Color.WHITE);
+                    try {
+                        String name = view.getResources().getResourceEntryName(view.getId()).toLowerCase();
+                        if (name.contains("logout")) {
+                            tv.setTextColor(Color.parseColor("#FF5722"));
+                        } else {
+                            tv.setTextColor(Color.WHITE);
+                        }
+                    } catch (Exception e) {
+                        tv.setTextColor(Color.WHITE);
+                    }
                 } else if (currentColor != Color.parseColor("#E50914") && currentColor != Color.parseColor("#FF5722") && currentColor != Color.RED) {
                     if (currentColor == Color.parseColor("#888888") || currentColor == Color.parseColor("#666666") || currentColor == Color.parseColor("#555555") || currentColor == Color.parseColor("#777777") || currentColor == Color.parseColor("#999999") || currentColor == Color.parseColor("#CCCCCC") || currentColor == Color.parseColor("#AAAAAA")) {
                         tv.setTextColor(isNightMode ? Color.parseColor("#888888") : Color.parseColor("#555555"));

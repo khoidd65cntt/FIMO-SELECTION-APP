@@ -46,6 +46,9 @@
         android:layout_alignParentBottom="true"
         android:background="#1F1F1F"
         app:menu="@menu/bottom_nav_menu"
-        app:labelVisibilityMode="labeled" />
+        app:labelVisibilityMode="labeled"
+
+        app:itemIconTint="@color/nav_item_color"
+        app:itemTextColor="@color/nav_item_color" />
 
 </RelativeLayout>

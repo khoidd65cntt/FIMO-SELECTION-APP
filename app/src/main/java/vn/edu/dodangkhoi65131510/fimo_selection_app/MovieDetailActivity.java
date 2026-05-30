@@ -63,6 +63,11 @@ public class MovieDetailActivity extends AppCompatActivity {
     private RecyclerView rvCast;
     private CastAdapter castAdapter;
     private List<CastMember> castList = new ArrayList<>();
+
+    private RecyclerView rvRecommendedMovies;
+    private RecommendAdapter recommendAdapter;
+    private List<RecommendMovie> recommendList = new ArrayList<>();
+
     private ExoPlayer exoPlayer;
     private StyledPlayerView playerView;
     private WebView webViewFullMovie;
@@ -100,6 +105,12 @@ public class MovieDetailActivity extends AppCompatActivity {
         castAdapter = new CastAdapter(castList);
         if (rvCast != null) {
             rvCast.setAdapter(castAdapter);
+        }
+
+        rvRecommendedMovies = findViewById(R.id.rvRecommendedMovies);
+        recommendAdapter = new RecommendAdapter(recommendList);
+        if (rvRecommendedMovies != null) {
+            rvRecommendedMovies.setAdapter(recommendAdapter);
         }
 
         if (btnBack != null) {
@@ -245,6 +256,9 @@ public class MovieDetailActivity extends AppCompatActivity {
             fetchTrailerKey(movieId);
             fetchMovieCast(movieId);
 
+            // GỌI HÀM LẤY PHIM GỢI Ý
+            fetchRecommendations(movieId, mediaType);
+
             if (btnPlayVideo != null) {
                 btnPlayVideo.setOnClickListener(v -> {
                     imgPlayerBackground.setVisibility(View.GONE);
@@ -284,8 +298,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                             vidsrcUrl = "https://vidsrc-embed.ru/embed/movie/" + movieId;
                         }
                         webViewFullMovie.loadUrl(vidsrcUrl);
-
-                        Toast.makeText(MovieDetailActivity.this, "Đang tải nguồn phim...", Toast.LENGTH_SHORT).show();
 
                         if (user != null) {
                             DatabaseReference historyRef = FirebaseDatabase.getInstance(DB_URL)
@@ -363,7 +375,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                             }
                         }
                     }
-
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {}
 
@@ -390,7 +401,6 @@ public class MovieDetailActivity extends AppCompatActivity {
                         if (playerView.getParent() != null) {
                             ((ViewGroup) playerView.getParent()).removeView(playerView);
                         }
-
                         fullscreenDialog.addContentView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
                         if (fullscreenDialog.getWindow() != null) {
@@ -478,6 +488,35 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void fetchRecommendations(String id, String mediaType) {
+        TmdbApi apiService = ApiClient.getClient().create(TmdbApi.class);
+        Call<RecommendResponse> call;
+
+        if ("tv".equalsIgnoreCase(mediaType)) {
+            call = apiService.getTvRecommendations(id, "3509f85d40f81d254b5afc2d8beaa8e1", "vi-VN");
+        } else {
+            call = apiService.getMovieRecommendations(id, "3509f85d40f81d254b5afc2d8beaa8e1", "vi-VN");
+        }
+
+        call.enqueue(new Callback<RecommendResponse>() {
+            @Override
+            public void onResponse(Call<RecommendResponse> call, Response<RecommendResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getResults() != null) {
+                    recommendList.clear();
+                    // Chỉ lấy tối đa 12 phim gợi ý cho đỡ lag máy
+                    if (response.body().getResults().size() > 12) {
+                        recommendList.addAll(response.body().getResults().subList(0, 12));
+                    } else {
+                        recommendList.addAll(response.body().getResults());
+                    }
+                    recommendAdapter.notifyDataSetChanged();
+                }
+            }
+            @Override
+            public void onFailure(Call<RecommendResponse> call, Throwable t) {}
+        });
+    }
+
     private void showTrailerDialog(String videoId) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_dialog_trailer);
@@ -535,7 +574,6 @@ public class MovieDetailActivity extends AppCompatActivity {
             CastMember member = list.get(position);
             holder.tvName.setText(member.getName());
 
-            // Giải cứu chữ trắng trên nền trắng của diễn viên
             SharedPreferences prefs = holder.itemView.getContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
             boolean isNightMode = prefs.getBoolean("isNightMode", true);
             int textColor = isNightMode ? Color.parseColor("#FFFFFF") : Color.parseColor("#000000");
@@ -566,6 +604,131 @@ public class MovieDetailActivity extends AppCompatActivity {
                 super(itemView);
                 imgAvatar = itemView.findViewById(R.id.imgCastAvatar);
                 tvName = itemView.findViewById(R.id.tvCastName);
+            }
+        }
+    }
+
+    public static class RecommendResponse {
+        private List<RecommendMovie> results;
+        public List<RecommendMovie> getResults() { return results; }
+    }
+
+    public static class RecommendMovie {
+        private String id;
+        private String title;
+        private String name;
+        private String poster_path;
+        private String overview;
+
+        public String getId() { return id; }
+        public String getTitle() { return title != null ? title : name; }
+        public String getPosterPath() { return poster_path; }
+        public String getOverview() { return overview; }
+    }
+
+    private class RecommendAdapter extends RecyclerView.Adapter<RecommendAdapter.RecommendViewHolder> {
+        private final List<RecommendMovie> list;
+
+        public RecommendAdapter(List<RecommendMovie> list) {
+            this.list = list;
+        }
+
+        @NonNull
+        @Override
+        public RecommendViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            Context ctx = parent.getContext();
+            float density = ctx.getResources().getDisplayMetrics().density;
+
+            android.widget.LinearLayout layout = new android.widget.LinearLayout(ctx);
+            layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+            RecyclerView.LayoutParams layoutParams = new RecyclerView.LayoutParams(
+                    (int) (110 * density), RecyclerView.LayoutParams.WRAP_CONTENT
+            );
+            layoutParams.setMarginEnd((int) (12 * density));
+            layout.setLayoutParams(layoutParams);
+
+            androidx.cardview.widget.CardView cardView = new androidx.cardview.widget.CardView(ctx);
+            android.widget.LinearLayout.LayoutParams cardParams = new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    (int) (160 * density)
+            );
+            cardView.setLayoutParams(cardParams);
+            cardView.setRadius(8 * density);
+            cardView.setCardBackgroundColor(Color.parseColor("#252525"));
+            cardView.setCardElevation(0);
+
+            ImageView imageView = new ImageView(ctx);
+            imageView.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT
+            ));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            cardView.addView(imageView);
+
+            TextView textView = new TextView(ctx);
+            android.widget.LinearLayout.LayoutParams textParams = new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            textParams.topMargin = (int) (6 * density);
+            textView.setLayoutParams(textParams);
+            textView.setTextColor(Color.WHITE);
+            textView.setTextSize(13);
+            textView.setMaxLines(2);
+            textView.setEllipsize(android.text.TextUtils.TruncateAt.END);
+
+            layout.addView(cardView);
+            layout.addView(textView);
+
+            return new RecommendViewHolder(layout, imageView, textView);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecommendViewHolder holder, int position) {
+            RecommendMovie movie = list.get(position);
+            holder.tvTitle.setText(movie.getTitle());
+
+            SharedPreferences prefs = holder.itemView.getContext().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE);
+            boolean isNightMode = prefs.getBoolean("isNightMode", true);
+            holder.tvTitle.setTextColor(isNightMode ? Color.WHITE : Color.parseColor("#111111"));
+
+            String imageUrl = "https://image.tmdb.org/t/p/w342" + movie.getPosterPath();
+            if (movie.getPosterPath() != null && !movie.getPosterPath().isEmpty()) {
+                Glide.with(holder.itemView.getContext())
+                        .load(imageUrl)
+                        .centerCrop()
+                        .placeholder(android.R.drawable.ic_menu_gallery)
+                        .into(holder.imgPoster);
+            } else {
+                holder.imgPoster.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
+
+            holder.itemView.setOnClickListener(v -> {
+                String currentMediaType = getIntent().getStringExtra("MEDIA_TYPE");
+                if (currentMediaType == null) currentMediaType = "movie";
+
+                Intent intent = new Intent(MovieDetailActivity.this, MovieDetailActivity.class);
+                intent.putExtra("MOVIE_ID", movie.getId());
+                intent.putExtra("MOVIE_TITLE", movie.getTitle());
+                intent.putExtra("MOVIE_DESC", movie.getOverview());
+                intent.putExtra("MOVIE_POSTER", imageUrl);
+                intent.putExtra("MEDIA_TYPE", currentMediaType);
+                startActivity(intent);
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return list.size();
+        }
+
+        class RecommendViewHolder extends RecyclerView.ViewHolder {
+            ImageView imgPoster;
+            TextView tvTitle;
+            public RecommendViewHolder(@NonNull View itemView, ImageView imgPoster, TextView tvTitle) {
+                super(itemView);
+                this.imgPoster = imgPoster;
+                this.tvTitle = tvTitle;
             }
         }
     }
