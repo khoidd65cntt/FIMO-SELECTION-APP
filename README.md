@@ -51,7 +51,7 @@ Dự án được xây dựng dựa trên tiêu chuẩn mã nguồn sạch và c
 <div align="center">
 
 <a href="https://www.youtube.com/shorts/WaynM7qsf_Q">
-  <img src="https://github.com/user-attachments/assets/c83552b5-6fc2-445b-9b24-57923853fdc0" width="270" alt="Video Trải nghiệm FIMO">
+  <img src="https://github.com/user-attachments/assets/9185a7ab-d3fb-49ca-9192-8e2d886d30a7" width="270" alt="Video Trải nghiệm FIMO">
 </a>
 </div>
 
