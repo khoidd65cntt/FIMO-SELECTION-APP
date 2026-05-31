@@ -82,6 +82,7 @@ Dự án được xây dựng dựa trên tiêu chuẩn mã nguồn sạch và c
 *   **Họ và tên:** Đỗ Đăng Khôi
 *   **MSSV:** `65131510`
 *   **Lớp:** 65.CNTT-2
+*   **SĐT:** 0796515238
 
 ---
 <div align="center">
