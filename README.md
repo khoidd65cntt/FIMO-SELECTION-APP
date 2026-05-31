@@ -46,21 +46,33 @@ Dự án được xây dựng dựa trên tiêu chuẩn mã nguồn sạch và c
 ---
 
 ## 📸 Demo ứng dụng (App Preview)
+
+### 🌟 Video Trải nghiệm Thực tế (Video Demo)
 <div align="center">
-  <table>
-    <tr>
-      <!-- Bạn thay link via.placeholder bằng link ảnh thực tế sau khi hoàn thành app nhé -->
-      <td><img src="https://github.com/user-attachments/assets/5bb37c0a-2550-49df-a476-fee41868487d" width="200"></td>
-      <td><img src="https://github.com/user-attachments/assets/8fac729d-ac15-4002-8347-042594310190" width="200"></td>
-      <td><img src="https://github.com/user-attachments/assets/832275f7-d0bf-4307-8a40-32108fe34e12" width="200"></td>
-    </tr>
-    <tr align="center">
-      <td><b>Màn hình chính</b></td>
-      <td><b>Tìm kiếm thông minh</b></td>
-      <td><b>Chi tiết phim</b></td>
-    </tr>
-  </table>
+
+
 </div>
+
+<br>
+
+### 1. Khám phá & Chi tiết
+| 🏠 Trang chủ | 🔍 Tìm kiếm Phim | 🎬 Chi tiết Phim |
+| :---: | :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/9eefbf3c-558f-4768-a4c4-0a5d901d48ab" width="270" /> | <img src="https://github.com/user-attachments/assets/57af1ad3-7d4e-4065-84d7-ad8fcde7e090" width="270" /> | <img src="https://github.com/user-attachments/assets/8f238d1f-7046-45bc-9b50-f5ebc1b49d71" width="270" /> |
+
+<br>
+
+### 2. Quản lý Cá nhân hóa
+| ❤️ Phim Yêu thích | 🕒 Lịch sử Xem phim | ⚙️ Menu (Đã đăng nhập) |
+| :---: | :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/5ef0445a-abfe-4697-802f-f408a48e9a91" width="270" /> | <img src="https://github.com/user-attachments/assets/3e61935b-2483-4339-be0e-e67a058b8c13" width="270" /> | <img src="https://github.com/user-attachments/assets/e86b5f7a-e697-45aa-80a2-d7909fbcea2e" width="270" /> |
+
+<br>
+
+### 3. Hệ thống Tài khoản
+| 🔐 Đăng nhập | 📝 Đăng ký Tài khoản | 👤 Menu (Chưa đăng nhập) |
+| :---: | :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/c1d1bcd9-5626-4d2e-acb4-2cbe633230ee" width="270" /> | <img src="https://github.com/user-attachments/assets/ffc65f8e-0a8e-4549-9b5d-c1fb6d6a2868" width="270" /> | <img src="https://github.com/user-attachments/assets/124f80d1-e695-42dc-8782-cdf68979cd16" width="270" /> |
 
 ---
 
