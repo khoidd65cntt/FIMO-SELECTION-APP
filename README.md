@@ -50,8 +50,9 @@ Dự án được xây dựng dựa trên tiêu chuẩn mã nguồn sạch và c
 ### 🌟 Video Trải nghiệm Thực tế (Video Demo)
 <div align="center">
 
-[![Video Trải nghiệm FIMO](https://img.youtube.com/vi/ID_VIDEO_CỦA_BẠN/maxresdefault.jpg)](https://www.youtube.com/shorts/WaynM7qsf_Q)
-
+<a href="https://www.youtube.com/shorts/WaynM7qsf_Q">
+  <img src="https://github.com/user-attachments/assets/c83552b5-6fc2-445b-9b24-57923853fdc0" width="270" alt="Video Trải nghiệm FIMO">
+</a>
 </div>
 
 <br>
